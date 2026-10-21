@@ -1,5 +1,8 @@
 {
   "schemaVersion": 1,
   "releaseDate": "2026.10.21",
-  "sources": {}
+  "sources": {
+    "burrowTutor": "f45b86499a082a72108893f3d4235932537437dc",
+    "burrowBackend": "385f5234710be50bed93466c5bf4e495ead92fff"
+  }
 }
