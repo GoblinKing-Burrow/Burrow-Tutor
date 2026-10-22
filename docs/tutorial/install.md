@@ -6,9 +6,9 @@ Use a development Burrow installation and only install code you trust.
 
 ## Release readiness
 
-The inspected public source declares version `2026.10.21`. At the documentation check on October 21, 2026, the public releases listing was empty and neither `2026.10.21` nor `v2026.10.21` resolved as a ref. Installation readiness has not been verified.
+The guides include the current image scaffold; the coordinated public snapshot follows the daily sync. If your installed version lacks the image routes, update Tutor and Core together after that sync.
 
-Burrow installs accepted tagged snapshots, not an arbitrary branch tip. Check the repository’s available tags before following the installation steps. An empty GitHub Releases listing by itself does not prove there are no tags.
+Burrow installs accepted tagged snapshots, not an arbitrary branch tip. Check the repository’s available tags before following the installation steps. An empty GitHub Releases listing by itself does not prove there are no tags. At the October 22 documentation check, a public installable Tutor tag was still unverified.
 
 ## Add, install, and enable
 

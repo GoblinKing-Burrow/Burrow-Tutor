@@ -27,7 +27,7 @@ A Settings module normally adds `contributions.settings` with 1–12 lowercase-k
 
 ## Activation and cleanup
 
-Server ESM exports `activate(context)`. Register routes/tools/diagnostics during activation. It may return nothing, cleanup, or `{close()}`. Context exposes `id`, `api`, `tools`, `diagnostics`, `runtimeDiagnostics`, `settings`, `secrets`, `agents`, `operator`, `conversations`, `models`, `scheduler`, and `logger`.
+Server ESM exports `activate(context)`. Register routes/tools/diagnostics during activation. It may return nothing, cleanup, or `{close()}`. Context exposes `id`, `api`, `tools`, `diagnostics`, `runtimeDiagnostics`, `settings`, `secrets`, `agents`, `operator`, `conversations`, `models`, `forge`, `scheduler`, and `logger`.
 
 ```js
 export async function activate(context) {
@@ -80,7 +80,25 @@ Tools publish under `mod.<id>`. Default `grant-required` availability uses per-a
 
 ## Generic Core capabilities
 
-Ordinary mods may call `agents.list`, operator identity/timezone, paged conversation list/read, model list/generateText, and owner-scoped scheduler list/read/create/update/delete/runs/trigger. Model credentials remain in Core; generation uses `tools:null` and does not mutate chat. Scheduler jobs are bound to the mod. Use the scheduler, not private recurring timers. At most four generic capability calls are active per mod.
+Ordinary mods may call `agents.list`, `operator.displayIdentity`, `operator.timezone`, paged conversation list/read, model list/generateText, generic Forge images, and owner-scoped scheduler list/read/create/update/delete/runs/trigger. Model credentials remain in Core; generation uses `tools:null` and does not mutate chat. Scheduler jobs are bound to the mod. Use the scheduler, not private recurring timers. At most four generic capability calls are active per mod.
+
+### Generic Forge images (ordinary mods)
+
+```js
+await context.forge.images.status() // { available, reason? }
+await context.forge.images.create({ prompt, idempotencyKey }) // { job, replayed }
+await context.forge.jobs.read(jobId) // image job owned by this same mod
+```
+
+This image-only facade uses the **operator's saved Forge image selection**. Status reports whether it resolves to an available image model without revealing connection/model IDs. Status availability is not authorization or a guarantee of successful creation. No privileged declaration is needed.
+
+Creation is asynchronous and may incur cost. Mods own product-level enablement and authorization UX. Accept only a non-empty prompt and a stable **mod-local** idempotency key; Core namespaces that key by the trusted installed mod ID before paid dispatch. Persist logical request intent before submission and the returned job ID durably; reuse the same key for retries, including after reload or a lost receipt. Return promptly, then poll `jobs.read` in later requests, not to terminal completion inside the submitting HTTP route.
+
+Core restricts reads to image jobs created by the same mod. Returned jobs contain bounded public status, timestamps, sanitized error code and artifact metadata with authenticated `previewUrl`. Use that URL for safe DOM-based previews, not raw HTML or public sharing. Credentials, storage references, prompts, model IDs, connection IDs, download URLs and another mod's jobs are not exposed. Same-mod ownership does not replace your product's per-record authorization.
+
+Submitted jobs run to success or failure. This facade has **no cancellation, attachment delivery, downloads, non-image modes, provider selection, or Forge configuration mutation**. Aborting a browser request or disabling your product does not cancel submitted work.
+
+See the [Forge image lesson and runnable scaffold](forge-images.md) for consent, durable idempotency, later polling and safe preview examples. The [public Forge image guide](https://burrow-docs.blissful-psychosis.com/burrow-tutor/forge-images/) explains the current interface and runnable scaffold.
 
 ## UI modules
 
@@ -88,9 +106,9 @@ UI is trusted browser ESM. Assets in declared UI directories can be publicly ser
 
 Control exports `mountControl({modId,root,api})` and may return cleanup or `{unmount}`.
 
-Settings exports lowercase-kebab `settingsSections` and `mountSettings({modId,runtimeScope,section,agents,primary,overflow,api,accessApi,refreshAgents,saveAgentExecutionEnvironment})`. Surfaces expose `replace`, `replaceChildren`, and `clear`. Ordinary mods normally need only `section`, `primary`, and `api`. Declarative `settingsContribution`/`createSettingsContribution` is also supported.
+Settings exports lowercase-kebab `settingsSections` and `mountSettings({modId,runtimeScope,section,agents,primary,overflow,api,accessApi,refreshAgents,saveAgentExecutionEnvironment})`. Surfaces expose `replace`, `replaceChildren`, and `clear`. Ordinary mods normally need only `section`, `primary`, and `api`. The current UI host also accepts optional module exports `settingsContribution` or `createSettingsContribution({api,accessApi,agents})` with `handleSettingsAction(actionId,values)` for Core-rendered Settings; treat the host implementation and Advanced example as the executable contract until this optional form is promoted into Backend's authoritative server docs.
 
-Archive exports `mountArchive({modId,runtimeScope,root,api,date})`; `date` is `YYYY-MM-DD` or empty. Return cleanup or `{update?,unmount?}`.
+Archive exports `mountArchive({modId,root,api,date})`; `date` is `YYYY-MM-DD` or empty. Date changes remount the module. Return optional cleanup or `{unmount}` (sync or async). The scoped `api` helper supports query strings for mod-owned cursor/date protocols.
 
 ## Lifecycle and compatibility
 
@@ -100,4 +118,5 @@ Burrow has no manifest `apiVersion` or Core range yet. This page plus the refere
 
 ## Release checklist
 
-Validate route/tool input; trust only Core identity; never return/log secrets; honor cancellation; clean up; test activation/auth/rejection/repeat/cleanup/UI; integration-test current Core; match manifest version to tag; publish an accepted tag; and verify install/enable/use/disable/update/uninstall in development.
+Validate route/tool input; trust only Core identity; never return/log secrets; honor supported cancellation (not Forge job cancellation); explicitly authorize paid work; retain Forge request keys/job IDs and poll later; clean up; test activation/auth/rejection/repeat/cleanup/UI; integration-test current Core; match manifest version to tag; publish an accepted tag; and verify install/enable/use/disable/update/uninstall in development.
+

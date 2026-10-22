@@ -16,7 +16,9 @@ Changing the ID changes the storage identity. Plan migrations deliberately rathe
 
 ## Extend the smallest working example
 
-Retain input validation, trusted Core identity checks, cancellation handling, and UI cleanup. Register routes and tools during activation. Keep secrets write-only to the UI and expose configured-state indicators instead of values.
+Retain input validation, trusted Core identity checks, supported cancellation handling, and UI cleanup. Register routes and tools during activation. Keep secrets write-only to the UI and expose configured-state indicators instead of values.
+
+For paid images, keep the [Forge scaffold](forge-images.md) disabled until explicitly enabled, explain cost before confirmation, persist stable intent/receipt records, and poll later. Never treat request abort or mod disable as Forge cancellation.
 
 Use the canonical contract for APIs beyond the example. Do not add private Core imports or privileged capabilities to an ordinary mod.
 

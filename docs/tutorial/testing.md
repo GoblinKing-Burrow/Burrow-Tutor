@@ -12,15 +12,19 @@ From the repository root:
 npm run build
 ```
 
-Despite its name, this command checks the syntax of the server, Control, and Settings modules. It does not compile files or produce a distributable bundle.
+Despite its name, this command checks the syntax of the Beginner and Advanced server modules, Forge scaffold, Control, Settings, Archive, and standalone UI examples. It does not compile files or produce a distributable bundle.
 
 ## Run the isolated tests
 
 ```sh
-node --test test/server.test.mjs test/ui.test.mjs
+node --test test/server.test.mjs test/ui.test.mjs test/forge-images.test.mjs test/advanced-capabilities.test.mjs test/advanced-ui-contracts.test.mjs
 ```
 
-These eight tests cover route/tool registration, public status, secret write/clear behavior, configuration authorization and malformed input, tool validation/cancellation, Control refresh/cleanup, Settings save/clear/cleanup, and UI error feedback.
+These 21 isolated tests cover route/tool registration, public status, secret write/clear behavior, configuration authorization and malformed input, tool validation/cancellation, Control refresh/cleanup, Settings save/clear/cleanup, and UI error feedback.
+
+Forge scaffold tests also cover paid consent, trusted identity, exact input fields, failed intent writes preventing dispatch, lost receipt recovery across reload, and sanitized failure responses.
+
+Advanced cases also cover identity/conversation/model forwarding, scheduler defaults and ownership fields, diagnostics, sensitive and managed protected results, persistent notes, declarative Settings, `apiTargets`, and Archive mounting/cleanup.
 
 The UI tests use a lightweight fake DOM. They do not launch a browser.
 
@@ -46,7 +50,7 @@ For another Core location:
 BURROW_CORE_ROOT=/absolute/path/to/Burrow-Backend npm test
 ```
 
-To run only the integration test:
+To run only the three integration tests:
 
 ```sh
 npm run test:core
@@ -60,11 +64,17 @@ The public [Burrow repository](https://github.com/GoblinKing-Burrow/Burrow) incl
 BURROW_CORE_ROOT=/absolute/path/to/Burrow/backend npm test
 ```
 
-The integration test imports Core’s mod discovery and host modules, copies the reference into a temporary runtime, discovers it, activates it, and invokes its status route and greeting tool. It checks that Core assigns the tool `grant-required` availability. Its backing store is an in-memory fixture.
+The integration test imports Core’s mod discovery and host modules, copies the reference into a temporary runtime, discovers it, activates it, and invokes its status route and greeting tool. It checks that Core assigns the tool `grant-required` availability. A second integration test exercises the real forked-host Forge transport and capability service: saved-selection availability, mod ownership, asynchronous receipts, stable retry across reload, and sanitized artifact previews. Its Forge store is an in-memory fixture; no paid provider is called. A third test hosts the Advanced entrypoint separately and exercises identity/timezone, conversation paging, models, scheduler CRUD/history/triggering, invocation-scoped diagnostics, and protected declaration/resolution through the current Core host with controlled stores and a local provider fixture.
 
 ## Verified snapshot
 
-On 21 October 2026, syntax checks and all **nine tests** passed on Node.js 24.19.0 against public [Burrow Core `aa5a30d`](https://github.com/GoblinKing-Burrow/Burrow/tree/aa5a30da683a3a8ea919025f107ff53f182ef8d6). Tutor source was [`0044278`](https://github.com/GoblinKing-Burrow/Burrow-Tutor/tree/004427883cc33615030d5ecf9574a8ac3d53c416). This is a tested source pair, not a promise about other releases or a verification of tagged installation.
+On 22 October 2026, the reviewed Tutor source was `e95fe672` (`2026.10.22.2`), including advanced lesson commit `23afbd0`; the reviewed Core source was `3304e633`. Syntax checks and all **24 tests passed** on Node.js 24.19.0: 21 isolated tests and three Core integration tests. Eleven focused Core Forge/model/timezone tests also passed. See the [capability coverage matrix](../advanced/coverage.md) for exactly which implementation paths those tests exercise and which they only register.
+
+These checks do not establish tagged installation readiness, live paid-provider or PostgreSQL operation, real-browser behavior, or compatibility with an older installed Core.
+
+## CI coverage
+
+The current verification workflow runs the server/UI subset (nine tests) and a conditional Core integration step. It does not currently run the twelve Forge/Advanced/Advanced-UI isolated tests. A green workflow is therefore not evidence that the full 24-test suite ran. Run the complete commands above for a local release check; inspect the integration step to distinguish a pass from unavailable Core checkout access.
 
 ## What passing tests establish
 

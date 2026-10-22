@@ -1,3 +1,5 @@
+import { registerForgeImageRoutes } from './forge-images.mjs';
+
 const DEFAULT_GREETING = 'Hello from the Burrow Reference Mod.';
 const MAX_GREETING_LENGTH = 160;
 const MAX_SECRET_LENGTH = 4096;
@@ -78,6 +80,11 @@ export async function activate(context) {
       return { ok: true, message: `${greeting} ${name}` };
     },
   });
+
+  // Forge is a focused post-Beginner lesson retained in the installable sample.
+  // The larger capability lab has its own standalone entrypoint under
+  // server/advanced/index.example.mjs and is not activated here.
+  registerForgeImageRoutes(context);
 
   context.logger.info('Burrow Reference Mod activated');
   return () => context.logger.info('Burrow Reference Mod stopped');

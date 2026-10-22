@@ -2,17 +2,17 @@
 
 [Back to Burrow Tutor](index.md)
 
-Read this alongside the [server](../../server/index.mjs), [manifest](../../burrow.mod.json), and [UI modules](../../ui).
+Read this alongside the [server](https://github.com/GoblinKing-Burrow/Burrow-Tutor/blob/main/server/index.mjs), [manifest](https://github.com/GoblinKing-Burrow/Burrow-Tutor/blob/main/burrow.mod.json), and [UI modules](https://github.com/GoblinKing-Burrow/Burrow-Tutor/tree/main/ui).
 
 ## Manifest first
 
-The root `burrow.mod.json` declares `burrow-reference-mod`, version `2026.10.21`, server entry `server/index.mjs`, and Control/Settings UI entries. Its `configuration` Settings contribution declares navigation/primary titles and `primary.capability: "settingsUi"`.
+The root `burrow.mod.json` declares `burrow-reference-mod`, a calendar version, server entry `server/index.mjs`, and Control/Settings UI entries. Its `configuration` Settings contribution declares navigation/primary titles and `primary.capability: "settingsUi"`.
 
 When you adapt it, choose a unique lowercase-kebab ID. The ID must match the install directory and cannot be `mod-data`. Storage is bound to that identity.
 
 ## Activate and register
 
-The server exports `activate(context)`. It registers two routes and one tool, logs activation, and returns a cleanup function that logs shutdown.
+The server exports `activate(context)`. It registers six routes and one tool, logs activation, and returns a cleanup function that logs shutdown. Two routes demonstrate greeting/configuration; four optional image routes are registered by `registerForgeImageRoutes(context)`.
 
 Registration happens during activation. A real mod must release any resources it creates during cleanup. This example has no server timer or long-running background work to stop.
 
@@ -50,6 +50,12 @@ Control exports `mountControl({root, api})`. Settings exports `settingsSections`
 Both use the scoped `api` helper, validate response shapes, display errors, and keep an AbortController. Cleanup aborts requests, removes listeners, and removes mounted content. A mounted flag prevents late responses from updating a departed UI.
 
 Settings ignores unknown sections. Its form clears the secret input after saving and never initializes it from a stored value.
+
+## Optional image scaffold
+
+The [Forge lesson](forge-images.md) adds operator-authorized image status, enablement, submission, and later job reads. It starts disabled, requires explicit paid confirmation, persists a stable request intent before dispatch, and saves the returned job ID. Repeating the same logical request is designed to recover its receipt rather than buy another image. A changed saved model selection can cause a conflict during recovery; keep the original key and investigate instead of creating a fresh paid request.
+
+The greeting/secret UI remains unchanged: it does not automatically create images or include an image-generation button. Build an explicit consent flow before wiring the scaffold into your UI. There is no agent image tool.
 
 ## What this example does not demonstrate
 

@@ -1,4 +1,4 @@
-# Burrow Tutor: build your first mod
+# Burrow Tutor: learn to build mods
 
 ![Fred, the lime-green Burrow Tutor goblin, teaching mod development](../assets/hero.png)
 
@@ -8,13 +8,20 @@ Fred is your tutor. His first lesson: cleanup hooks are a sign of character.
 
 Burrow Tutor puts the public third-party mod contract beside a small reference mod you can read, test, and adapt. It uses plain JavaScript ESM, no framework, no third-party package dependencies, and no generated build source.
 
-## Start here
+## Beginner lessons
 
 1. [Run and test Tutor](testing.md).
 2. [Install and try the reference mod](install.md).
 3. [Understand how the example works](walkthrough.md).
 4. [Read the mod author contract](contract.md).
-5. [Adapt and release your own mod](release.md).
+5. [Add optional Forge images](forge-images.md).
+6. [Adapt and release your own mod](release.md).
+
+## Advanced lessons
+
+Continue within Tutor with [Advanced lessons](../advanced/index.md): agents and operator metadata, complete conversation reads, isolated model generation, scheduler jobs, diagnostics, persistent data, protected results, UI contributions, and lifecycle/recovery. The [coverage matrix](../advanced/coverage.md) connects each capability to source, lessons, tests, and verification gaps.
+
+Both sections belong to the same Tutor repository. The installed reference remains small; Advanced examples are supplied alongside it for deliberate use in your development copy.
 
 ## What you need
 
@@ -32,9 +39,14 @@ cd Burrow-Tutor
 
 - `burrow.mod.json`: identity, version, server/UI entry points, and Settings contribution.
 - `server/index.mjs`: activation, routes, public settings, write-only secrets, one agent tool, and cleanup.
+- `server/forge-images.mjs`: disabled-by-default image request scaffold with paid consent and durable retries.
+- `docs/forge-images.md`: the Forge lesson; Tutor has no separate lesson engine or code generator.
 - `ui/control.js`: status panel and refresh.
 - `ui/settings.js`: configuration form and cleanup.
-- `test/`: server, lightweight UI, and current-Core integration tests.
+- `server/advanced/index.example.mjs`: optional Advanced capability-lab entrypoint.
+- `docs/advanced/`: Advanced lessons and capability coverage matrix.
+- `ui/archive.js`, `ui/declarative-settings.example.js`: optional UI examples.
+- `test/`: Beginner, Advanced, lightweight UI, and current-Core integration tests.
 - `docs/mod-contract.md`: the canonical public contract.
 
 The repository name is Burrow-Tutor. The installed example’s manifest ID is `burrow-reference-mod`, and its display name is **Burrow Reference Mod**.
@@ -43,6 +55,6 @@ The repository name is Burrow-Tutor. The installed example’s manifest ID is `b
 
 Mods are trusted executable server/browser code. A forked host limits faults and exposed Core APIs; it is not an operating-system sandbox. Install only code you trust. Installation does not grant agent tools.
 
-The inspected source declares version `2026.10.21`. Public source availability alone does not establish that an installable tag exists; see the [installation readiness note](install.md#release-readiness).
+These guides include the current Beginner and Advanced examples. Public snapshots follow the daily sync, so a guide can lead an installed release by one day. Check [installation readiness](install.md#release-readiness) and test the Core version you use.
 
 [Browse the source](https://github.com/GoblinKing-Burrow/Burrow-Tutor) · [Read the license](../../LICENSE)

@@ -2,7 +2,7 @@
 
 [Back to Burrow Tutor](index.md)
 
-The authoritative reference is [Third-party mod contract](../mod-contract.md). Keep it beside the runnable example when building a mod. This guide is a map to that document, not a second contract.
+The authoritative reference is [Third-party mod contract](https://github.com/GoblinKing-Burrow/Burrow-Tutor/blob/main/docs/mod-contract.md). Keep it beside the runnable example when building a mod. This guide is a map to that document, not a second contract.
 
 ## Ordinary third-party APIs
 
@@ -26,9 +26,15 @@ Never return or log secrets. Ordinary JSON tool output is visible. Consult the c
 
 ## Generic capabilities and UI
 
-The contract describes agents, operator identity/timezone, paged conversations, models, and owner-scoped scheduler operations. Model credentials stay in Core. Use the scheduler for recurring work rather than private recurring timers. At most four generic capability calls may be active per mod.
+The contract describes agents, operator identity/timezone, paged conversations, models, image-only Forge jobs, and owner-scoped scheduler operations. Model credentials stay in Core. Use the scheduler for recurring work rather than private recurring timers. At most four generic capability calls may be active per mod.
 
 Supported UI surfaces include Control, Settings, and Archive. UI is trusted browser ESM; declared UI directories can expose public assets. Keep secrets and server-only code elsewhere.
+
+## Forge images
+
+Ordinary mods can call `context.forge.images.status()`, `context.forge.images.create({ prompt, idempotencyKey })`, and `context.forge.jobs.read(jobId)`. Core uses the operator’s saved image selection, namespaces request keys by mod identity, and returns only that mod’s image jobs. Availability is not paid-work consent; the mod must supply its own authorization and cost UX.
+
+Keep stable request keys and job receipts durably, return asynchronous receipts, and inspect completion in later requests. Core-provided authenticated previews are not public share or download links. The facade does not provide cancellation, attachments, non-image modes, provider selection, or Forge configuration changes. See the [runnable Forge lesson](forge-images.md).
 
 ## Persistence and compatibility
 
