@@ -18,7 +18,7 @@ export function mountArchive({ root, api, date }) {
   const state = el('p', { role: 'status', 'aria-live': 'polite', text: 'Loading example jobs…' });
   const list = el('ul', { className: 'settings-list' });
   const section = el('section', { className: 'setting-section', 'aria-labelledby': 'reference-archive-heading' },
-    el('h2', { id: 'reference-archive-heading', text: 'Reference Mod jobs' }),
+    el('h2', { id: 'reference-archive-heading', text: 'Tutor jobs' }),
     el('p', { className: 'settings-description', text: date ? `Read-only jobs for ${date}.` : 'Read-only jobs for all dates.' }),
     state, list);
   root.replaceChildren(section);

@@ -100,6 +100,7 @@ export function registerCoreCapabilityRoutes(context) {
     return json(200, { ok: true, ...await context.models.generateText(generation) });
   }));
 
+
   context.api.get('/advanced/scheduler/jobs', route(async (request) => {
     const query = request.query || {};
     return json(200, { ok: true, ...await context.scheduler.list({
@@ -155,4 +156,21 @@ export function registerCoreCapabilityRoutes(context) {
   context.api.post('/advanced/scheduler/jobs/:jobId/trigger', route(async (request) => json(202, {
     ok: true, receipt: await context.scheduler.trigger(bounded(request.params?.jobId, 96)),
   })));
+
+  context.api.post('/advanced/models/generations', route(async (request) => {
+    const input = exact(request.body, ['connectionId', 'model', 'prompt', 'maxTokens', 'effort', 'temperature', 'requestId', 'confirmPaid']);
+    if (input.confirmPaid !== true) fail('paid_confirmation_required');
+    const generation = {
+      connectionId: bounded(input.connectionId, 128), model: bounded(input.model, 256), prompt: bounded(input.prompt, 100_000),
+      idempotencyKey: `tutor-generation:${bounded(input.requestId, 128)}`,
+    };
+    if (input.maxTokens !== undefined) { if (!Number.isSafeInteger(input.maxTokens) || input.maxTokens < 1) fail('advanced_input_invalid'); generation.maxTokens = input.maxTokens; }
+    if (input.effort !== undefined) generation.effort = bounded(input.effort, 32);
+    if (input.temperature !== undefined) { if (typeof input.temperature !== 'number' || !Number.isFinite(input.temperature) || input.temperature < 0 || input.temperature > 2) fail('advanced_input_invalid'); generation.temperature = input.temperature; }
+    return json(202, { ok: true, ...await context.models.generations.submit(generation) });
+  }));
+  context.api.get('/advanced/models/generations/:jobId', route(async (request) => json(200, {
+    ok: true, job: await context.models.generations.read(bounded(request.params?.jobId, 96)),
+  })));
+
 }

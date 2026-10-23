@@ -1,13 +1,13 @@
 {
   "name": "burrow-tutor-reference-mod",
-  "version": "2026.10.22",
+  "version": "2026.10.23",
   "private": true,
   "type": "module",
   "engines": {
     "node": ">=22.13"
   },
   "scripts": {
-    "build": "node --check server/index.mjs && node --check server/forge-images.mjs && node --check server/advanced/index.example.mjs && node --check server/advanced/core-capabilities.mjs && node --check server/advanced/diagnostics-tools.mjs && node --check server/advanced/persistent-data.mjs && node --check server/advanced/api-targets.example.mjs && node --check ui/control.js && node --check ui/settings.js && node --check ui/archive.js && node --check ui/declarative-settings.example.js",
+    "build": "node --check server/index.mjs && node --check server/forge-images.mjs && node --check server/advanced/index.example.mjs && node --check server/advanced/core-capabilities.mjs && node --check server/advanced/external-agent-turns.mjs && node --check server/advanced/diagnostics-tools.mjs && node --check server/advanced/persistent-data.mjs && node --check server/advanced/api-targets.example.mjs && node --check ui/control.js && node --check ui/settings.js && node --check ui/archive.js && node --check ui/declarative-settings.example.js",
     "test": "node --test test/*.test.mjs",
     "test:core": "node --test test/core-contract.test.mjs"
   }

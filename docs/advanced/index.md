@@ -9,16 +9,17 @@ The [public Tutor contract](https://github.com/GoblinKing-Burrow/Burrow-Tutor/bl
 ## Capability map
 
 1. [Agents and operator metadata](agents-operator.md)
-2. [Conversation inventory and complete reads](conversations.md)
-3. [Models and isolated text generation](models.md)
-4. [Owner-scoped scheduler jobs](scheduler.md)
-5. [Diagnostics: mod adapters and tool-scoped runtime reads](diagnostics.md)
-6. [Persistent mod-data](persistent-data.md)
-7. [Advanced tools and protected results](tools-protected-results.md)
-8. [UI contributions: Control, Settings, and Archive](ui-contributions.md)
-9. [Forge images](forge.md)
-10. [Lifecycle, concurrency, cancellation, and errors](lifecycle-concurrency-errors.md)
-11. [Contract/source/docs/test coverage](coverage.md)
+2. [Externally initiated agent turns](external-agent-turns.md)
+3. [Conversation inventory and complete reads](conversations.md)
+4. [Models and isolated text generation](models.md)
+5. [Owner-scoped scheduler jobs](scheduler.md)
+6. [Diagnostics: mod adapters and tool-scoped runtime reads](diagnostics.md)
+7. [Persistent mod-data](persistent-data.md)
+8. [Advanced tools and protected results](tools-protected-results.md)
+9. [UI contributions: Control, Settings, and Archive](ui-contributions.md)
+10. [Forge images](forge.md)
+11. [Lifecycle, concurrency, cancellation, and errors](lifecycle-concurrency-errors.md)
+12. [Contract/source/docs/test coverage](coverage.md)
 
 ## Try the runnable examples
 

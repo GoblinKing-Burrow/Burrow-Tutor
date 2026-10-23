@@ -7,7 +7,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const coreRoot = path.resolve(process.env.BURROW_CORE_ROOT || path.join(root, '..', 'Burrow-Backend'));
 process.env.BURROW_SETTINGS_KEY ||= Buffer.alloc(32, 7).toString('base64');
 async function memoryStore() { const settings = new Map(); const secrets = new Map(); return { get: async (n,f=null)=>settings.has(n)?settings.get(n):f, set: async(n,v)=>(settings.set(n,v),v), delete: async n=>settings.delete(n), getSecret: async n=>secrets.get(n)??null, setSecret: async(n,v)=>(v?secrets.set(n,String(v)):secrets.delete(n),true), clearSecret: async n=>secrets.delete(n), hasSecret: async n=>secrets.has(n), close: async()=>{} }; }
-test('current Burrow Core discovers and hosts the packaged reference mod', async (t) => { const [{ discoverMods }, { startModHost }] = await Promise.all([import(pathToFileURL(path.join(coreRoot,'src/mod-runtime.mjs'))), import(pathToFileURL(path.join(coreRoot,'src/mod-host.mjs')))]); const runtimeRoot=await fs.mkdtemp('/tmp/burrow-reference-contract-'); const modsRoot=path.join(runtimeRoot,'mods'); await fs.mkdir(modsRoot,{recursive:true}); await fs.cp(root,path.join(modsRoot,'burrow-reference-mod'),{recursive:true,filter:(source)=>path.basename(source)!=='.git'}); t.after(()=>fs.rm(runtimeRoot,{recursive:true,force:true})); const [mod]=await discoverMods({runtimeRoot,logger:{warn(){}}}); assert.equal(mod.id,'burrow-reference-mod'); assert.notEqual(mod.status,'failed',mod.error); assert.deepEqual(Object.keys(mod.ui).sort(),['control','settings']); const host=startModHost({mod,store:await memoryStore(),logger:{debug(){},info(){},warn(){},error(){}}}); t.after(()=>host.close()); const activation=await host.activated; assert.deepEqual(activation.map(({method,path:routePath})=>`${method} ${routePath}`),['GET /status','PUT /configuration','GET /images/status','PUT /images/configuration','POST /images','GET /images/jobs/:jobId']); assert.deepEqual(activation.tools.map(({name,availability})=>({name,availability})),[{name:'reference_greet',availability:'grant-required'}]); assert.equal(activation.diagnosticsSupported,false); assert.equal((await host.invoke('route-1',{auth:{enabled:false,authenticated:false},body:null,query:{},params:{},headers:{},method:'GET',path:'/status'})).body.ok,true); assert.match((await host.invokeTool('reference_greet',{name:'Core'},{agentId:'fixture',sessionId:'session'})).message,/Core$/); });
+test('current Burrow Core discovers and hosts the packaged reference mod', async (t) => { const [{ discoverMods }, { startModHost }] = await Promise.all([import(pathToFileURL(path.join(coreRoot,'src/mod-runtime.mjs'))), import(pathToFileURL(path.join(coreRoot,'src/mod-host.mjs')))]); const runtimeRoot=await fs.mkdtemp('/tmp/burrow-reference-contract-'); const modsRoot=path.join(runtimeRoot,'mods'); await fs.mkdir(modsRoot,{recursive:true}); await fs.cp(root,path.join(modsRoot,'burrow-reference-mod'),{recursive:true,filter:(source)=>path.basename(source)!=='.git'}); t.after(()=>fs.rm(runtimeRoot,{recursive:true,force:true})); const [mod]=await discoverMods({runtimeRoot,logger:{warn(){}}}); assert.equal(mod.id,'burrow-reference-mod'); assert.equal(mod.manifest.name,'Tutor'); assert.equal(mod.manifest.contributions.settings[0].navigation.title,'Tutor'); assert.equal(mod.manifest.contributions.settings[0].primary.title,'Tutor'); assert.notEqual(mod.status,'failed',mod.error); assert.deepEqual(Object.keys(mod.ui).sort(),['control','settings']); const host=startModHost({mod,store:await memoryStore(),logger:{debug(){},info(){},warn(){},error(){}}}); t.after(()=>host.close()); const activation=await host.activated; assert.deepEqual(activation.map(({method,path:routePath})=>`${method} ${routePath}`),['GET /status','PUT /configuration','GET /images/status','PUT /images/configuration','POST /images','GET /images/jobs/:jobId']); assert.deepEqual(activation.tools.map(({name,availability})=>({name,availability})),[{name:'reference_greet',availability:'grant-required'}]); assert.equal(activation.diagnosticsSupported,false); assert.equal((await host.invoke('route-1',{auth:{enabled:false,authenticated:false},body:null,query:{},params:{},headers:{},method:'GET',path:'/status'})).body.ok,true); assert.match((await host.invokeTool('reference_greet',{name:'Core'},{agentId:'fixture',sessionId:'session'})).message,/Core$/); });
 
 test('packaged Forge scaffold uses current Core RPC, durable retry, and image ownership', async (t) => {
   const [{ startModHost }, { createModCapabilities }, { forgeFixture }] = await Promise.all([
@@ -93,18 +93,54 @@ test('packaged Forge scaffold uses current Core RPC, durable retry, and image ow
 });
 
 test('packaged advanced examples invoke current Core capability RPC and preserve boundaries', async (t) => {
-  const [{ startModHost }, { createModCapabilities }, { advancedCoreFixture }, { activate: activateAdvanced }] = await Promise.all([
+  const [{ startModHost }, { createModCapabilities }, { createModExternalTurnDispatcher }, { advancedCoreFixture }, { activate: activateAdvanced }] = await Promise.all([
     import(pathToFileURL(path.join(coreRoot, 'src/mod-host.mjs'))),
     import(pathToFileURL(path.join(coreRoot, 'src/mod-capabilities.mjs'))),
+    import(pathToFileURL(path.join(coreRoot, 'src/mod-external-turns.mjs'))),
     import('./advanced-core-fixture.mjs'),
     import('../server/advanced/index.example.mjs'),
   ]);
   assert.equal(typeof activateAdvanced, 'function');
   const fixture = advancedCoreFixture();
   const ownerModId = 'burrow-reference-mod';
+  const turnRows = new Map(); const turnKeys = new Map(); let turnSequence = 0; let releaseTurn;
+  const turnStore = {
+    async create(input) {
+      const key = `${input.ownerModId}:${input.idempotencyKey}`; const existing = turnKeys.get(key);
+      if (existing) {
+        if (existing.agentId !== input.agentId || existing.sessionId !== input.sessionId || existing.message !== input.message) throw Error('mod_external_turn_idempotency_conflict');
+        return { turn: { ...existing }, replayed: true };
+      }
+      const turn = { id: `external-${++turnSequence}`, ...input, status: 'queued', runId: null, result: null, error: null, createdAt: '2026-10-22T00:00:00.000Z', updatedAt: '2026-10-22T00:00:00.000Z', startedAt: null, completedAt: null };
+      turnRows.set(turn.id, turn); turnKeys.set(key, turn); return { turn: { ...turn }, replayed: false };
+    },
+    async getByIdempotency(owner, key) { const turn = turnKeys.get(`${owner}:${key}`); return turn ? { ...turn } : null; },
+    async getOwned(owner, id) { const turn = turnRows.get(id); return turn?.ownerModId === owner ? { ...turn } : null; },
+    async markRunning(id, runId) { const turn = turnRows.get(id); if (turn?.status !== 'queued') return null; Object.assign(turn, { status: 'running', runId, startedAt: '2026-10-22T00:00:01.000Z', updatedAt: '2026-10-22T00:00:01.000Z' }); return { ...turn }; },
+    async complete(id, patch) { const turn = turnRows.get(id); Object.assign(turn, patch, { completedAt: '2026-10-22T00:00:02.000Z', updatedAt: '2026-10-22T00:00:02.000Z' }); return { ...turn }; },
+  };
+  const execution = {};
+  execution.promise = new Promise((resolve) => { releaseTurn = resolve; });
+  const externalTurnDispatcher = createModExternalTurnDispatcher({
+    store: turnStore, stores: fixture.stores, rootDir: '/fixture', resolveAgentRuntime: fixture.resolveAgentRuntime,
+    createRunId: () => 'external-run', executeTurn: async (input) => { execution.input = input; return execution.promise; },
+  });
+  t.after(() => externalTurnDispatcher.close());
+  const generationRows = new Map(); let generationSequence = 0;
+  const generationDispatcher = {
+    async submit(input) {
+      const existing = [...generationRows.values()].find(row => row.ownerModId === input.ownerModId && row.idempotencyKey === input.idempotencyKey);
+      if (existing) return { job: { id: existing.id, status: existing.status, text: existing.text, error: null, createdAt: existing.createdAt, updatedAt: existing.updatedAt, startedAt: null, completedAt: existing.completedAt }, replayed: true };
+      const row = { id: `generation-${++generationSequence}`, ...input, status: 'succeeded', text: 'Durable Tutor result.', error: null, createdAt: '2026-10-22T00:00:00.000Z', updatedAt: '2026-10-22T00:00:01.000Z', completedAt: '2026-10-22T00:00:01.000Z' };
+      generationRows.set(row.id, row); return { job: { id: row.id, status: row.status, text: row.text, error: null, createdAt: row.createdAt, updatedAt: row.updatedAt, startedAt: null, completedAt: row.completedAt }, replayed: false };
+    },
+    async read(owner, id) { const row = generationRows.get(id); return row?.ownerModId === owner ? { id: row.id, status: row.status, text: row.text, error: null, createdAt: row.createdAt, updatedAt: row.updatedAt, startedAt: null, completedAt: row.completedAt } : null; },
+  };
   const capabilities = createModCapabilities({
     ownerModId,
     resolveAgentRuntime: fixture.resolveAgentRuntime,
+    externalTurnDispatcher,
+    generationDispatcher,
     resolveAgentWorkspaceRoot: fixture.resolveAgentWorkspaceRoot,
     fetchImpl: fixture.fetchImpl,
     scheduledJobScheduler: fixture.scheduler,
@@ -121,7 +157,7 @@ test('packaged advanced examples invoke current Core capability RPC and preserve
   const invoke = (routeId, { body = null, query = {}, params = {} } = {}) => host.invoke(routeId, { auth, body, query, params, headers: {} });
 
   const identity = await invoke('route-1');
-  assert.deepEqual(identity.body, { ok: true, modId: ownerModId, operator: { id: 'goblin-king', name: 'Goblin King' }, timezone: 'America/Chicago', agents: [{ id: 'hatchet', name: 'Hatchet', enabled: true }] });
+  assert.deepEqual(identity.body, { ok: true, modId: ownerModId, operator: { id: 'goblin-king', name: 'Goblin King' }, timezone: 'America/Chicago', agents: [{ id: 'hatchet', name: 'Hatchet', enabled: true }, { id: 'sleeping', name: 'Sleeping', enabled: false }] });
   assert.doesNotMatch(JSON.stringify(identity), /private-avatar|private-profile|never-exposed/);
 
   const inventory = await invoke('route-2', { query: { agentId: 'hatchet', limit: '10', includeArchived: 'true' } });
@@ -152,6 +188,49 @@ test('packaged advanced examples invoke current Core capability RPC and preserve
   assert.equal((await invoke('route-12', { params: { jobId } })).status, 202);
   assert.equal((await invoke('route-10', { params: { jobId } })).body.job.id, jobId);
   assert.equal((await invoke('route-7', { params: { jobId } })).status, 500);
+
+  const durableGeneration = await invoke('route-13', { body: { connectionId: 'fixture-connection', model: 'fixture-model', prompt: 'Generate without holding the route.', requestId: 'slow-1', confirmPaid: true } });
+  assert.equal(durableGeneration.status, 202); assert.equal(durableGeneration.body.job.status, 'succeeded'); assert.equal(durableGeneration.body.replayed, false);
+  const generationRead = await invoke('route-14', { params: { jobId: durableGeneration.body.job.id } });
+  assert.equal(generationRead.body.job.text, 'Durable Tutor result.');
+  assert.doesNotMatch(JSON.stringify(generationRead), /Generate without holding|idempotencyKey|ownerModId/);
+
+  // External-turn routes follow the fourteen core-capability routes. Dispatch is
+  // operator-only and disabled until explicitly enabled; no model provider runs.
+  assert.equal((await invoke('route-15')).body.enabled, false);
+  const turnInput = { requestId: 'transport:99', agentId: 'hatchet', sessionId: 'transport:thread-42', message: 'Handle this prompt.', confirmDispatch: true };
+  assert.equal((await invoke('route-17', { body: turnInput })).status, 403);
+  assert.equal((await invoke('route-16', { body: { enabled: true } })).body.enabled, true);
+  assert.equal((await invoke('route-17', { body: { ...turnInput, agentId: 'sleeping', requestId: 'disabled-agent' } })).status, 409);
+  const accepted = await invoke('route-17', { body: turnInput });
+  assert.equal(accepted.status, 202); assert.equal(accepted.body.turn.status, 'queued'); assert.equal(accepted.body.replayed, false);
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(execution.input.body.message, turnInput.message);
+  assert.equal(execution.input.body.sessionId, turnInput.sessionId);
+  assert.deepEqual(execution.input.externalTurnMetadata, { ownerModId, externalTurnId: accepted.body.turn.id });
+  const running = await invoke('route-18', { params: { requestId: turnInput.requestId } });
+  assert.equal(running.body.turn.status, 'running');
+  const replay = await invoke('route-17', { body: turnInput });
+  assert.equal(replay.body.replayed, true); assert.equal(replay.body.turn.id, accepted.body.turn.id);
+  const otherCapabilities = createModCapabilities({ ownerModId: 'other-mod', resolveAgentRuntime: fixture.resolveAgentRuntime, externalTurnDispatcher, stores: fixture.stores });
+  await assert.rejects(otherCapabilities.readExternalTurn({ turnId: accepted.body.turn.id }), /mod_external_turn_not_found/);
+  releaseTurn({ ok: true, answerText: 'x'.repeat(25_000), decision: 'answer', blockers: Array.from({ length: 25 }, (_, index) => `blocker-${index}`) });
+  await new Promise(resolve => setImmediate(resolve)); await new Promise(resolve => setImmediate(resolve));
+  const completedTurn = await invoke('route-18', { params: { requestId: turnInput.requestId } });
+  assert.equal(completedTurn.body.turn.status, 'succeeded'); assert.equal(completedTurn.body.turn.result.answerText.length, 24_000); assert.equal(completedTurn.body.turn.result.blockers.length, 20);
+  assert.doesNotMatch(JSON.stringify(completedTurn), /Handle this prompt|idempotencyKey|ownerModId/);
+
+  let interruptEntered; const entered = new Promise(resolve => { interruptEntered = resolve; });
+  const interruptionDispatcher = createModExternalTurnDispatcher({
+    store: turnStore, stores: fixture.stores, rootDir: '/fixture', resolveAgentRuntime: fixture.resolveAgentRuntime,
+    createRunId: () => 'interrupt-run', executeTurn: async ({ body }) => { interruptEntered(); await new Promise(resolve => body.abortSignal.addEventListener('abort', resolve, { once: true })); return { ok: false }; },
+  });
+  const interruptionCapabilities = createModCapabilities({ ownerModId, resolveAgentRuntime: fixture.resolveAgentRuntime, externalTurnDispatcher: interruptionDispatcher, stores: fixture.stores });
+  const interruptedInput = { agentId: 'hatchet', sessionId: 'transport:restart', message: 'accepted once', idempotencyKey: 'transport:restart:1' };
+  const interruption = await interruptionCapabilities.submitExternalTurn(interruptedInput); await entered; await interruptionDispatcher.close();
+  assert.equal((await interruptionCapabilities.readExternalTurn({ turnId: interruption.turn.id })).status, 'interrupted');
+  const interruptedReplay = await interruptionCapabilities.submitExternalTurn(interruptedInput);
+  assert.equal(interruptedReplay.replayed, true); assert.equal(interruptedReplay.turn.id, interruption.turn.id); assert.equal(interruptedReplay.turn.status, 'interrupted');
 
   const diagnostics = await host.invokeTool('reference_self_diagnostics', { operation: 'context-status', sessionId: 'default' }, { agentId: 'hatchet', sessionId: 'default', conversationId: 'chat' });
   assert.deepEqual(diagnostics, { ok: true, operation: 'context-status', agentId: 'hatchet' });

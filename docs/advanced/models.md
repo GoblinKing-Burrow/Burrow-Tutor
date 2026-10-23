@@ -42,6 +42,27 @@ await api('/advanced/models/generate', {
 
 Tutor's 100,000-character prompt check is example policy, not a universal Core maximum. Always select from a fresh `models.list()` result; a model can be disabled or reconfigured between listing and generation.
 
+
+## Durable generation jobs for slow models
+
+When provider work may exceed an HTTP route deadline—especially local LLMs—submit a durable Core job and poll it later instead of awaiting `generateText()` inside the route:
+
+```js
+const accepted = await context.models.generations.submit({
+  connectionId: selected.connectionId,
+  model: selected.model,
+  prompt: 'Summarize this record.',
+  maxTokens: 500,
+  idempotencyKey: 'record-summary:42',
+});
+
+const job = await context.models.generations.read(accepted.job.id);
+```
+
+The mod-local idempotency key is mandatory. Exact retries return the same job; changed input with the same key fails. Status is `queued`, `running`, `succeeded`, `failed`, or `interrupted`. Core keeps credentials and prompts private, returns bounded terminal text, limits durable provider dispatch globally, interrupts uncertain in-flight work on restart, and drains accepted work during normal shutdown. There is no cancellation operation. A route timeout now cancels only that invocation and leaves the mod loaded, but durable jobs remain the correct design for slow work.
+
+Tutor exposes `POST /advanced/models/generations` and `GET /advanced/models/generations/:jobId` as operator-only examples. The submit route requires `confirmPaid: true` and a stable product `requestId`; it returns `202` acceptance rather than waiting for text.
+
 ## Cancellation, concurrency, and failures
 
 Pass an `AbortSignal` to cancel an in-flight provider request. Core rejects it with `mod_capability_cancelled`. Host shutdown aborts outstanding provider requests and rejects with `mod_capability_shutdown`. A configured integration timeout rejects with `mod_capability_timeout`. There is no default capability wall-clock deadline, but an HTTP route still has its own deadline; do not use a route to wait for work intended to outlive it.

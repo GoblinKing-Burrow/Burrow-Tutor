@@ -15,7 +15,7 @@ Burrow installs accepted tagged snapshots, not an arbitrary branch tip. Check th
 1. Open **Settings → Mods → Mod sources**.
 2. Add `https://github.com/GoblinKing-Burrow/Burrow-Tutor.git`.
 3. Refresh the source and select an available accepted tagged version.
-4. Install **Burrow Reference Mod**.
+4. Install **Tutor**.
 5. Explicitly enable it. Fresh installations start disabled.
 
 If no accepted version appears, confirm that an accepted tag exists and its version matches the manifest. Refreshing cannot turn an untagged branch tip into a release.
@@ -24,7 +24,7 @@ If no accepted version appears, confirm that an accepted tag exists and its vers
 
 Open the reference mod’s Control surface to load its greeting and secret-configured status. **Refresh status** reloads those values.
 
-Open its **Reference Mod** Settings contribution:
+Open its **Tutor** Settings contribution:
 - Set a non-empty greeting, up to 160 characters after trimming.
 - Optionally enter an example secret, up to 4096 characters.
 - Save the configuration and refresh Control.

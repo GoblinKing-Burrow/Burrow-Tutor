@@ -15,8 +15,8 @@ export function advancedCoreFixture() {
     identities: async () => ({ operator: { id: 'goblin-king', name: 'Goblin King', avatar: 'private-avatar', profile: 'private-profile' } }),
   };
   const agents = {
-    list: async () => [{ id: 'hatchet', name: 'Hatchet', enabled: true }],
-    get: async (id) => id === 'hatchet' ? { id, name: 'Hatchet', enabled: true } : null,
+    list: async () => [{ id: 'hatchet', name: 'Hatchet', enabled: true }, { id: 'sleeping', name: 'Sleeping', enabled: false }],
+    get: async (id) => id === 'hatchet' ? { id, name: 'Hatchet', enabled: true } : id === 'sleeping' ? { id, name: 'Sleeping', enabled: false } : null,
   };
   const conversations = {
     listSessions: async ({ agentId }) => [{ sessionId: 'default', agentId, updatedAt: now(), metadata: { archiveTitle: 'Tutor fixture' } }],

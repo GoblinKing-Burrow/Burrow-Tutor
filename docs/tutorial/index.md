@@ -49,7 +49,7 @@ cd Burrow-Tutor
 - `test/`: Beginner, Advanced, lightweight UI, and current-Core integration tests.
 - `docs/mod-contract.md`: the canonical public contract.
 
-The repository name is Burrow-Tutor. The installed example’s manifest ID is `burrow-reference-mod`, and its display name is **Burrow Reference Mod**.
+The repository name is Burrow-Tutor. The installed example’s manifest ID is `burrow-reference-mod`, and its installed, in-Burrow display name is **Tutor**.
 
 ## Before you install
 

@@ -29,7 +29,7 @@ Start with [Build your first mod](docs/tutorial/index.md): run the small referen
 
 ## Advanced capability track
 
-After the beginner path, use the [Advanced ordinary-mod capabilities](docs/advanced/index.md) track for agents and operator metadata, conversations, model execution, scheduler jobs, both diagnostics interfaces, persistent mod-data, protected tool results, Forge, Archive and the other UI surfaces, and lifecycle/concurrency/error behavior. Its separate [`server/advanced/index.example.mjs`](server/advanced/index.example.mjs) entrypoint composes the runnable Advanced server modules without activating them in the installed Beginner mod. The [coverage matrix](docs/advanced/coverage.md) maps the upstream contract to source, lessons, unit tests, and current-Core checks.
+After the beginner path, use the [Advanced ordinary-mod capabilities](docs/advanced/index.md) track for agents and operator metadata, externally initiated agent turns, conversations, model execution, scheduler jobs, both diagnostics interfaces, persistent mod-data, protected tool results, Forge, Archive and the other UI surfaces, and lifecycle/concurrency/error behavior. Its separate [`server/advanced/index.example.mjs`](server/advanced/index.example.mjs) entrypoint composes the runnable Advanced server modules without activating them in the installed Beginner mod. The [coverage matrix](docs/advanced/coverage.md) maps the upstream contract to source, lessons, unit tests, and current-Core checks.
 
 > **Ordinary/privileged boundary:** the advanced track is still for ordinary third-party mods. `system: true`, `systemCapabilities`, `context.modManagement`, and `context.processExecution` are privileged Core-integration contracts and are deliberately not taught as ordinary APIs.
 

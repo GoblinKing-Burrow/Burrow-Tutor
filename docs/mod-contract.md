@@ -80,7 +80,24 @@ Tools publish under `mod.<id>`. Default `grant-required` availability uses per-a
 
 ## Generic Core capabilities
 
-Ordinary mods may call `agents.list`, `operator.displayIdentity`, `operator.timezone`, paged conversation list/read, model list/generateText, generic Forge images, and owner-scoped scheduler list/read/create/update/delete/runs/trigger. Model credentials remain in Core; generation uses `tools:null` and does not mutate chat. Scheduler jobs are bound to the mod. Use the scheduler, not private recurring timers. At most four generic capability calls are active per mod.
+Ordinary mods may call `agents.list`, asynchronous `agents.turns.submit/read`, `operator.displayIdentity`, `operator.timezone`, paged conversation list/read, model list/generateText, generic Forge images, and owner-scoped scheduler list/read/create/update/delete/runs/trigger. Model credentials remain in Core; generation uses `tools:null` and does not mutate chat. Scheduler jobs are bound to the mod. Use the scheduler, not private recurring timers. At most four generic capability calls are active per mod.
+
+### Externally initiated agent turns (ordinary mods)
+
+```js
+const accepted = await context.agents.turns.submit({
+  agentId, sessionId, message, idempotencyKey,
+}); // { turn, replayed }
+const turn = await context.agents.turns.read(accepted.turn.id);
+```
+
+This is the generic ingress for a message accepted by an external transport/product into an agent's ordinary chat-turn pipeline. Submission requires a registered enabled agent, an explicit non-empty durable session ID, a non-empty prompt (maximum 100,000 characters), and a stable non-empty mod-local idempotency key (maximum 256 characters). Core binds the trusted installed mod ID. Retrying the exact agent/session/message/key returns the same turn with `replayed: true`, even if that agent was disabled after acceptance; reusing a key for changed input fails with `mod_external_turn_idempotency_conflict`.
+
+Persist product intent/key before submission and retain the returned turn ID. `submit` returns promptly after durable acceptance: return the receipt from the HTTP route, then poll `read` in a later request rather than awaiting model completion. Turn IDs and keys are same-mod scoped. The public turn/result is bounded and omits prompts, tools/results, traces, credentials, provider/model configuration and runtime paths. Same-mod ownership does not replace product-level authorization for an external user or record.
+
+Receipts/results survive mod-child and ordinary host reload. In-flight work does not promise Core-process restart recovery: prior queued/running work becomes `interrupted`. Retrying the same key returns that interrupted receipt and cannot duplicate work; a deliberate new attempt needs a new logical key. There is no cancellation operation.
+
+See the focused [Advanced external agent-turn lesson](advanced/external-agent-turns.md) for the disabled-by-default operator route, durable retry and later-poll scaffold.
 
 ### Generic Forge images (ordinary mods)
 
@@ -118,5 +135,5 @@ Burrow has no manifest `apiVersion` or Core range yet. This page plus the refere
 
 ## Release checklist
 
-Validate route/tool input; trust only Core identity; never return/log secrets; honor supported cancellation (not Forge job cancellation); explicitly authorize paid work; retain Forge request keys/job IDs and poll later; clean up; test activation/auth/rejection/repeat/cleanup/UI; integration-test current Core; match manifest version to tag; publish an accepted tag; and verify install/enable/use/disable/update/uninstall in development.
+Validate route/tool input; trust only Core identity; never return/log secrets; honor supported cancellation (neither external turns nor Forge jobs currently cancel); explicitly authorize agent dispatch and paid work; retain external-turn keys/turn IDs and Forge request keys/job IDs and poll later; clean up; test activation/auth/rejection/repeat/cleanup/UI; integration-test current Core; match manifest version to tag; publish an accepted tag; and verify install/enable/use/disable/update/uninstall in development.
 

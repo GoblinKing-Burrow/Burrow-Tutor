@@ -1,4 +1,5 @@
 import { registerCoreCapabilityRoutes } from './core-capabilities.mjs';
+import { registerExternalAgentTurnRoutes } from './external-agent-turns.mjs';
 import { registerDiagnosticAdapter, registerAdvancedTools, clearAdvancedToolState } from './diagnostics-tools.mjs';
 import { registerPersistentDataRoutes } from './persistent-data.mjs';
 
@@ -11,6 +12,7 @@ import { registerPersistentDataRoutes } from './persistent-data.mjs';
  */
 export function activate(context) {
   registerCoreCapabilityRoutes(context);
+  registerExternalAgentTurnRoutes(context);
   registerPersistentDataRoutes(context);
   registerDiagnosticAdapter(context);
   registerAdvancedTools(context);
