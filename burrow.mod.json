@@ -1,7 +1,7 @@
 {
   "id": "burrow-reference-mod",
   "name": "Tutor",
-  "version": "2026.10.23",
+  "version": "2026.10.25",
   "server": "server/index.mjs",
   "ui": {
     "control": "ui/control.js",

@@ -8,7 +8,7 @@ Use a development Burrow installation and only install code you trust.
 
 The guides include the current image scaffold; the coordinated public snapshot follows the daily sync. If your installed version lacks the image routes, update Tutor and Core together after that sync.
 
-Burrow installs accepted tagged snapshots, not an arbitrary branch tip. Check the repository’s available tags before following the installation steps. An empty GitHub Releases listing by itself does not prove there are no tags. At the October 22 documentation check, a public installable Tutor tag was still unverified.
+Burrow installs accepted tagged snapshots, not an arbitrary branch tip. Check the repository’s available tags before following the installation steps. An empty GitHub Releases listing by itself does not prove there are no tags. On 25 October 2026, public tag [`v2026.10.23`](https://github.com/GoblinKing-Burrow/Burrow-Tutor/tree/v2026.10.23) was verified at `87dbfd7b6aa9a42e07ae343a31a766b0c98269fb`, with manifest version `2026.10.23` and the Beginner entrypoints. This verifies tag/manifest agreement, not a completed install or compatibility test. The development source reviewed for these guides is newer; refresh and check the exact tag you install.
 
 ## Add, install, and enable
 
@@ -53,4 +53,5 @@ If the tool is unavailable, check that the mod is enabled and the intended agent
 Uninstall is not a data-erasure operation. Plan data deletion explicitly when adapting the example.
 
 A configuration request returns 401 when Core says authentication is enabled but the request is not authenticated as an operator. Use the normal operator session. When authentication is disabled, this example allows configuration writes.
+
 

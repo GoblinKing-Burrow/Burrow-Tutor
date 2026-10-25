@@ -35,7 +35,7 @@ Tutor intentionally declares no managed skill and contains no runnable skill pac
 
 The generic host permits four active capability calls per installed mod. Do not create an unbounded `Promise.all` over agents/conversations/generations. Use a small queue, page incrementally, persist checkpoints after consumption, and release traversals by reaching the final page.
 
-The normal HTTP route/tool deadline is separate from capability timeouts. Core capability work has no default wall-clock deadline, though integrations may configure positive metadata/read and model-generation timeouts. Waiting inside a route can still lose the route even if the nested capability remains meaningful. Durable long work should return a receipt and expose later status.
+The normal HTTP route/tool deadline is separate from capability timeouts. Core capability work has no default wall-clock deadline, though integrations may configure positive metadata/read and model-generation timeouts. A timed-out invocation returns `mod_route_timeout`, cancels invocation-scoped capability work, and leaves the child and unrelated routes available. Already accepted durable jobs continue independently. Durable long work should return a receipt and expose later status.
 
 Tutor-specific concurrency examples:
 
@@ -52,6 +52,8 @@ Tutor-specific concurrency examples:
 | `models.generateText` | optional `{ signal }`; aborts provider request and rejects `mod_capability_cancelled`. |
 | `runtimeDiagnostics.read` | optional `{ signal }`; use the active tool's signal. |
 | UI `api` request | browser `AbortSignal`; abort on unmount and ignore late results. |
+| External agent turn | Core `agents.turns.cancel(turnId)` requests cooperative owner-scoped cancellation; poll for terminal state. Tutor exposes no cancellation route. |
+| Durable text generation | No cancellation API; losing a route does not cancel accepted work. |
 | Forge image job | **No cancellation after submission**; aborting the route/UI is not job cancellation. |
 | Scheduler accepted work | no ordinary per-call signal/cancel API; disabling intent affects scheduling, not rollback of already dispatched work. |
 

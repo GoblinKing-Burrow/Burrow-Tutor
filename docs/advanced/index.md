@@ -29,9 +29,9 @@ For hands-on Advanced work:
 
 1. Clone Tutor and run the [syntax, isolated, and Core checks](../tutorial/testing.md).
 2. In your development copy, choose a unique mod ID/name and set the manifest `server` to `server/advanced/index.example.mjs`.
-3. Keep its three sibling modules: `core-capabilities.mjs`, `diagnostics-tools.mjs`, and `persistent-data.mjs`.
+3. Keep its four sibling modules: `core-capabilities.mjs`, `external-agent-turns.mjs`, `diagnostics-tools.mjs`, and `persistent-data.mjs`.
 4. Remove Beginner UI/contribution declarations unless you adapt them: the Advanced entrypoint does not serve Beginner `/status` or `/configuration` routes. To try Archive, declare `ui.archive: "ui/archive.js"`; it reads Advanced scheduler routes.
-5. Follow the normal [development installation and enablement steps](../tutorial/install.md). Begin with read-only identity/model/inventory calls. Generation requires explicit paid-work confirmation; scheduler jobs start disabled.
+5. Follow the normal [development installation and enablement steps](../tutorial/install.md). Begin with read-only identity/model/inventory calls. Generation requires explicit paid-work confirmation; scheduler jobs and external-agent dispatch start disabled.
 
 The declarative Settings and `apiTargets` files are standalone examples, not registered by this entrypoint. The [Forge lesson](../tutorial/forge-images.md) uses the Beginner scaffold. Pick the pieces you need rather than enabling every example in a live installation.
 
@@ -49,3 +49,4 @@ Tutor intentionally describes those names only to prevent accidental misuse. Con
 ## Documentation status and future skill
 
 The coverage matrix names the expected runnable advanced paths so documentation, implementation, and tests can move together. A future release may package these lessons in a repository `SKILL.md` for agent-guided authoring. Do not create or depend on that file yet; it is not part of today's mod contract.
+

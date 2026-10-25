@@ -20,7 +20,7 @@ Despite its name, this command checks the syntax of the Beginner and Advanced se
 node --test test/server.test.mjs test/ui.test.mjs test/forge-images.test.mjs test/advanced-capabilities.test.mjs test/advanced-ui-contracts.test.mjs
 ```
 
-These 21 isolated tests cover route/tool registration, public status, secret write/clear behavior, configuration authorization and malformed input, tool validation/cancellation, Control refresh/cleanup, Settings save/clear/cleanup, and UI error feedback.
+The current source defines 22 isolated tests (counted from declarations, not rerun in this review). They cover route/tool registration, public status, secret write/clear behavior, configuration authorization and malformed input, tool validation/cancellation, Control refresh/cleanup, Settings save/clear/cleanup, and UI error feedback.
 
 Forge scaffold tests also cover paid consent, trusted identity, exact input fields, failed intent writes preventing dispatch, lost receipt recovery across reload, and sanitized failure responses.
 
@@ -66,15 +66,19 @@ BURROW_CORE_ROOT=/absolute/path/to/Burrow/backend npm test
 
 The integration test imports Core’s mod discovery and host modules, copies the reference into a temporary runtime, discovers it, activates it, and invokes its status route and greeting tool. It checks that Core assigns the tool `grant-required` availability. A second integration test exercises the real forked-host Forge transport and capability service: saved-selection availability, mod ownership, asynchronous receipts, stable retry across reload, and sanitized artifact previews. Its Forge store is an in-memory fixture; no paid provider is called. A third test hosts the Advanced entrypoint separately and exercises identity/timezone, conversation paging, models, scheduler CRUD/history/triggering, invocation-scoped diagnostics, and protected declaration/resolution through the current Core host with controlled stores and a local provider fixture.
 
-## Verified snapshot
+## Historical verified snapshot
 
 On 22 October 2026, the reviewed Tutor source was `e95fe672` (`2026.10.22.2`), including advanced lesson commit `23afbd0`; the reviewed Core source was `3304e633`. Syntax checks and all **24 tests passed** on Node.js 24.19.0: 21 isolated tests and three Core integration tests. Eleven focused Core Forge/model/timezone tests also passed. See the [capability coverage matrix](../advanced/coverage.md) for exactly which implementation paths those tests exercise and which they only register.
 
 These checks do not establish tagged installation readiness, live paid-provider or PostgreSQL operation, real-browser behavior, or compatibility with an older installed Core.
 
+## Current source review
+
+The 25 October 2026 full documentation review inspected Tutor `9679fc4fe9ccd532142b84b0257d290ae8d9eec3` (2026.10.25) and Core `3bf50374d3601c821e787912d52b9044eaf649ec`, including external-agent turns, durable generation examples and the Tutor UI label. No application tests were run in this pass; the earlier 24-pass execution receipt remains historical, not a pass claim for this newer commit. External-turn coverage uses the real Core dispatcher with in-memory receipts and a controlled executor. Durable-generation route coverage uses a fake generation dispatcher; live-provider and restart behavior are not established by that fixture.
+
 ## CI coverage
 
-The current verification workflow runs the server/UI subset (nine tests) and a conditional Core integration step. It does not currently run the twelve Forge/Advanced/Advanced-UI isolated tests. A green workflow is therefore not evidence that the full 24-test suite ran. Run the complete commands above for a local release check; inspect the integration step to distinguish a pass from unavailable Core checkout access.
+The verification workflow runs the server/UI subset and a conditional Core integration step. It does not run the complete Forge/Advanced/Advanced-UI isolated suites. A green workflow is therefore not evidence that the complete test suite ran. Run the complete commands above for a local release check; inspect the integration step to distinguish a pass from unavailable Core checkout access.
 
 ## What passing tests establish
 

@@ -91,7 +91,7 @@ Never interpolate a protected value into command text. `protectedBindings` injec
 
 ## Cancellation and lifecycle
 
-Tool cancellation aborts `caller.signal`; pass it to cancellable nested work and check it around non-cancellable steps. The normal tool deadline applies, and a timed-out host is terminated. Disable/crash/stop revokes live routing immediately but preserves catalog/grants for restart; uninstall removes catalog and grants. Running calls are canceled by cleanup/shutdown, and retained handles fail closed. Mod tools are currently available only where mod hosts are loaded, not standalone CLI agent runs.
+Tool cancellation aborts `caller.signal`; pass it to cancellable nested work and check it around non-cancellable steps. The normal tool deadline applies, and a timed-out invocation is cancelled without terminating the host or unrelated routes. Disable/crash/stop revokes live routing immediately but preserves catalog/grants for restart; uninstall removes catalog and grants. Running calls are canceled by cleanup/shutdown, and retained handles fail closed. Mod tools are currently available only where mod hosts are loaded, not standalone CLI agent runs.
 
 If durable work is accepted before cancellation, cancellation does not automatically roll it back; return a receipt and provide later status. Do not claim managed protected results make an arbitrary side effect transactional.
 

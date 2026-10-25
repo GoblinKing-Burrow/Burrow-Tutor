@@ -42,7 +42,6 @@ await api('/advanced/models/generate', {
 
 Tutor's 100,000-character prompt check is example policy, not a universal Core maximum. Always select from a fresh `models.list()` result; a model can be disabled or reconfigured between listing and generation.
 
-
 ## Durable generation jobs for slow models
 
 When provider work may exceed an HTTP route deadline—especially local LLMs—submit a durable Core job and poll it later instead of awaiting `generateText()` inside the route:
@@ -59,7 +58,7 @@ const accepted = await context.models.generations.submit({
 const job = await context.models.generations.read(accepted.job.id);
 ```
 
-The mod-local idempotency key is mandatory. Exact retries return the same job; changed input with the same key fails. Status is `queued`, `running`, `succeeded`, `failed`, or `interrupted`. Core keeps credentials and prompts private, returns bounded terminal text, limits durable provider dispatch globally, interrupts uncertain in-flight work on restart, and drains accepted work during normal shutdown. There is no cancellation operation. A route timeout now cancels only that invocation and leaves the mod loaded, but durable jobs remain the correct design for slow work.
+The mod-local idempotency key is mandatory. Exact retries return the same job; changed input with the same key fails. Status is `queued`, `running`, `succeeded`, `failed`, or `interrupted`. Core keeps credentials and prompts private, returns bounded terminal text, limits durable provider dispatch globally, interrupts uncertain unfinished work on restart, and stops admission, aborts active provider calls and drains their persistence during normal shutdown. Shutdown is not a promise that every accepted job completes successfully. There is no cancellation operation. A route timeout now cancels only that invocation and leaves the mod loaded, but durable jobs remain the correct design for slow work.
 
 Tutor exposes `POST /advanced/models/generations` and `GET /advanced/models/generations/:jobId` as operator-only examples. The submit route requires `confirmPaid: true` and a stable product `requestId`; it returns `202` acceptance rather than waiting for text.
 
@@ -78,3 +77,5 @@ No `systemCapabilities` or provider SDK is required. The mod cannot obtain crede
 ## Verify
 
 `test/advanced-capabilities.test.mjs` checks exact input validation, paid confirmation, option forwarding, and response handling. `npm run test:core` sends the request through Tutor's forked host, current Core model selection, and the real model adapter to a controlled local provider response; it verifies safe metadata, effort/temperature forwarding, omitted tools, and credential privacy. The request supplies `maxTokens`, but this integration case does not assert the provider token field. Live paid providers, cancellation, timeout, and concurrency remain gaps documented in [coverage](coverage.md).
+
+The durable-generation route tests use a fake generation dispatcher for acceptance/replay/read checks. They do not prove a production worker survives restart or a real slow provider completes. No application tests were run during the 25 October 2026 full source review.

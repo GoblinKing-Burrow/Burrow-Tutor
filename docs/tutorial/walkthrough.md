@@ -59,5 +59,5 @@ The greeting/secret UI remains unchanged: it does not automatically create image
 
 ## What this example does not demonstrate
 
-The public contract also describes Archive UI, generic Core capabilities, scheduler jobs, advanced tool authorization, and persistent files. Tutor does not implement those features. Do not treat their absence as a promise that they are unsupported, or this example’s tests as coverage of them.
+The public contract also describes Archive UI, generic Core capabilities, scheduler jobs, advanced tool authorization, and persistent files. The installed Beginner entrypoint does not activate those features. Separate [Advanced examples](../advanced/index.md) demonstrate them; switch entrypoints deliberately and follow the coverage matrix rather than treating Beginner tests as Advanced verification.
 

@@ -125,7 +125,9 @@ test('packaged advanced examples invoke current Core capability RPC and preserve
     store: turnStore, stores: fixture.stores, rootDir: '/fixture', resolveAgentRuntime: fixture.resolveAgentRuntime,
     createRunId: () => 'external-run', executeTurn: async (input) => { execution.input = input; return execution.promise; },
   });
-  t.after(() => externalTurnDispatcher.close());
+  // Release the deliberately held run before draining, including when an earlier assertion fails.
+  // Otherwise Core's owned-work close waits forever and masks the assertion as a test hang.
+  t.after(() => { releaseTurn({ ok: false }); return externalTurnDispatcher.close(); });
   const generationRows = new Map(); let generationSequence = 0;
   const generationDispatcher = {
     async submit(input) {
@@ -207,7 +209,7 @@ test('packaged advanced examples invoke current Core capability RPC and preserve
   await new Promise(resolve => setImmediate(resolve));
   assert.equal(execution.input.body.message, turnInput.message);
   assert.equal(execution.input.body.sessionId, turnInput.sessionId);
-  assert.deepEqual(execution.input.externalTurnMetadata, { ownerModId, externalTurnId: accepted.body.turn.id });
+  assert.deepEqual(execution.input.externalTurnMetadata, { ownerModId, externalTurnId: accepted.body.turn.id, displayMessage: turnInput.message });
   const running = await invoke('route-18', { params: { requestId: turnInput.requestId } });
   assert.equal(running.body.turn.status, 'running');
   const replay = await invoke('route-17', { body: turnInput });
