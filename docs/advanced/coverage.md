@@ -115,3 +115,7 @@ npm run test:core
 ```
 
 By default `test:core` resolves the sibling checkout at `../Burrow-Backend`; override with `BURROW_CORE_ROOT=/absolute/path` when needed. Its Forge backend is an in-memory fixture and makes no paid provider call.
+
+## Delta review
+
+On 26 October 2026, a delta review checked Tutor `e9805f5a50a49b831dc29a757ae511ef916ded11` (2026.10.25.1) against Core `4df4b424e2b2856cb2c25c8464da7f806eb661e0`. Tutor runtime examples are unchanged since the full review. The checked-in Core integration test now releases its deliberately held turn before teardown and expects Core’s default `displayMessage` metadata. This fixes fixture cleanup/expectations; it is not a new runtime capability or a test pass reported by this documentation review. No application tests were run.
