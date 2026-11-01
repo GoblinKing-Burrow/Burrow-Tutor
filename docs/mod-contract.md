@@ -123,7 +123,7 @@ Core restricts reads to image jobs created by the same mod. Returned jobs contai
 
 Submitted jobs run to success or failure. This facade has **no cancellation, attachment delivery, downloads, non-image modes, provider selection, or Forge configuration mutation**. Aborting a browser request or disabling your product does not cancel submitted work.
 
-See the [Forge image lesson and runnable scaffold](forge-images.md) for consent, durable idempotency, later polling and safe preview examples. The [public Forge image guide](https://burrow-docs.blissful-psychosis.com/burrow-tutor/forge-images/) explains the current interface and runnable scaffold.
+See the [Forge image lesson and runnable scaffold](forge-images.md) for consent, durable idempotency, later polling and safe preview examples. The [public Forge image guide](https://docs.goblin-kingdom.com/burrow-tutor/forge-images/) explains the current interface and runnable scaffold.
 
 ## UI modules
 

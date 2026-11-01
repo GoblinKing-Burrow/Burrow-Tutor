@@ -29,7 +29,7 @@ Fresh installs start disabled. Enabling starts the host and publishes routes/too
 
 An enabled ordinary mod may declare read-only, globally available `managedSkills` entries with an ID, Git repository, and repository-relative path to `SKILL.md` or a skill package. Core owns fetch, validation, reconciliation, runtime storage, periodic refresh, failure retention, conflicts, and removal from the effective catalog on mod disable/uninstall. This is a manifest contribution, not an agent tool or arbitrary code execution; fetching a package does not run scripts or Git hooks.
 
-Tutor intentionally declares no managed skill and contains no runnable skill package or test, so use Core's [managed-skills guide](https://burrow-docs.blissful-psychosis.com/burrow-skills/managed-skills/) rather than inferring behavior from this repository. The future `SKILL.md` mentioned by the advanced index is not present and must not be treated as current Tutor implementation.
+Tutor intentionally declares no managed skill and contains no runnable skill package or test, so use Core's [managed-skills guide](https://docs.goblin-kingdom.com/burrow-skills/managed-skills/) rather than inferring behavior from this repository. The future `SKILL.md` mentioned by the advanced index is not present and must not be treated as current Tutor implementation.
 
 ## Concurrency budgets
 
