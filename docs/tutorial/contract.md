@@ -26,7 +26,7 @@ Never return or log secrets. Ordinary JSON tool output is visible. Consult the c
 
 ## Generic capabilities and UI
 
-The contract describes agents, operator identity/timezone, paged conversations, models, image-only Forge jobs, and owner-scoped scheduler operations. Model credentials stay in Core. Use the scheduler for recurring work rather than private recurring timers. At most four generic capability calls may be active per mod.
+The contract describes agents, externally initiated agent turns, operator identity/timezone, paged conversations, isolated and durable model generation, image-only Forge jobs, and owner-scoped scheduler operations. Model credentials stay in Core. Use the scheduler for recurring work rather than private recurring timers. At most four generic capability calls may be active per mod.
 
 Supported UI surfaces include Control, Settings, and Archive. UI is trusted browser ESM; declared UI directories can expose public assets. Keep secrets and server-only code elsewhere.
 
@@ -43,4 +43,5 @@ Settings, secrets, and `$BURROW_RUNTIME_ROOT/mods/mod-data/<id>/` survive update
 There is currently no manifest `apiVersion` or Core compatibility range. The canonical contract and reference mod define the current public interface. Test each Core release you claim to support and record those results; a provenance commit is not a compatibility guarantee.
 
 See [adapt and release](release.md) for the practical checklist.
+
 

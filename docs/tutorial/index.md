@@ -19,7 +19,7 @@ Burrow Tutor puts the public third-party mod contract beside a small reference m
 
 ## Advanced lessons
 
-Continue within Tutor with [Advanced lessons](../advanced/index.md): agents and operator metadata, complete conversation reads, isolated model generation, scheduler jobs, diagnostics, persistent data, protected results, UI contributions, and lifecycle/recovery. The [coverage matrix](../advanced/coverage.md) connects each capability to source, lessons, tests, and verification gaps.
+Continue within Tutor with [Advanced lessons](../advanced/index.md): agents and operator metadata, externally initiated agent turns, complete conversation reads, isolated and durable model generation, scheduler jobs, diagnostics, persistent data, protected results, UI contributions, and lifecycle/recovery. The [coverage matrix](../advanced/coverage.md) connects each capability to source, lessons, tests, and verification gaps.
 
 Both sections belong to the same Tutor repository. The installed reference remains small; Advanced examples are supplied alongside it for deliberate use in your development copy.
 
@@ -58,3 +58,4 @@ Mods are trusted executable server/browser code. A forked host limits faults and
 These guides include the current Beginner and Advanced examples. Public snapshots follow the daily sync, so a guide can lead an installed release by one day. Check [installation readiness](install.md#release-readiness) and test the Core version you use.
 
 [Browse the source](https://github.com/GoblinKing-Burrow/Burrow-Tutor) · [Read the license](../../LICENSE)
+

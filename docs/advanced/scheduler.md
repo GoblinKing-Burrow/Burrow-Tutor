@@ -19,6 +19,12 @@ Core binds `ownerModId` from the installed host. A mod cannot choose the owner o
 
 Jobs are disabled by default. Prefer create-disabled, show the operator the exact agent/prompt/schedule, then explicitly enable. All jobs use the operator timezone; legacy `timezone` payload fields are ignored. `modelConnectionId` and `model` must be supplied together. On update, set both to `null` to clear an override; Core uses the same selected-model validation as operator jobs.
 
+## Current Core job kinds versus the Tutor adapter
+
+The current Core store also supports `jobKind: "task"` with `taskId` and optional `extraInstructions`, and `scheduleKind: "once"` with `runAt`; omitted kinds retain prompt/cron behavior. The owner-scoped capability forwards to that store while retaining installed-mod ownership. Task targets must be existing ToDo tasks assigned to the selected agent. Do not treat this as permission to bypass product authorization or task eligibility.
+
+Tutor’s bundled create/update adapters deliberately accept only the prompt/cron fields shown in this lesson. They do not accept task IDs, one-time scheduling fields, or `contextMode`; adding those fields to a Tutor HTTP request is rejected. Adapting the lab requires runtime changes and corresponding negative tests, not just a documentation example. See Core’s [scheduled-work guide](https://docs.goblin-kingdom.com/burrow/guide/tasks/) for operator behavior and one-time consumption semantics.
+
 ## Read, page, update, and trigger
 
 ```js
@@ -79,3 +85,4 @@ Owner scoping cannot be overridden by body fields, tool arguments, installation,
 ## Verify
 
 `test/advanced-capabilities.test.mjs` verifies owner fields are not accepted, jobs default disabled, model selectors are paired, and trigger returns promptly. Archive UI tests exercise a list consumer. `npm run test:core` executes create/list/read/update/run-history/trigger/delete through Tutor's forked host and current Core owner-scoped scheduler capability using controlled durable-store semantics. Foreign-owner isolation, cursor limits, selected-model rejection, operator-timezone inheritance during dispatch, and unavailable-owner behavior remain focused gaps. See [coverage](coverage.md).
+

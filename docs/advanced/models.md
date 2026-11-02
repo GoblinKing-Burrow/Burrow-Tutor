@@ -24,6 +24,10 @@ A listed record contains `connectionId`, `model`, `provider`, optional display `
 
 Generation uses the existing Core model adapter with `tools: null`. It does **not** create or mutate a chat session, run agent tools, append a turn, or act as an agent. Core adds no special mod prompt/output ceiling, but provider/model capacity, shared adapter transport bounds, and host RPC transport still apply.
 
+## Thinking-mode compatibility
+
+Core’s chat/model settings can offer an independent Anthropic thinking-mode selection, but this generic mod facade and Tutor’s exact-field routes do **not** expose a `thinkingMode` argument or a thinking-mode picker. The listed safe metadata remains the effort/temperature fields above. Generation resolves the saved Core model configuration; do not assume chat controls can be forwarded as arbitrary extra request fields. If a saved legacy Off selection is incompatible with the current model, correct the selection through Core rather than inventing a Tutor option.
+
 ## Product policy and the Tutor route
 
 Model calls may incur cost. Core's capability validates the model request, but your mod owns product authorization, rate/usage policy, and user-facing consent. Tutor's `POST /advanced/models/generate` therefore requires trusted operator route access and an explicit product field `confirmPaid: true`; it strips that field before calling Core.
@@ -79,3 +83,4 @@ No `systemCapabilities` or provider SDK is required. The mod cannot obtain crede
 `test/advanced-capabilities.test.mjs` checks exact input validation, paid confirmation, option forwarding, and response handling. `npm run test:core` sends the request through Tutor's forked host, current Core model selection, and the real model adapter to a controlled local provider response; it verifies safe metadata, effort/temperature forwarding, omitted tools, and credential privacy. The request supplies `maxTokens`, but this integration case does not assert the provider token field. Live paid providers, cancellation, timeout, and concurrency remain gaps documented in [coverage](coverage.md).
 
 The durable-generation route tests use a fake generation dispatcher for acceptance/replay/read checks. They do not prove a production worker survives restart or a real slow provider completes. No application tests were run during the 25 October 2026 full source review.
+

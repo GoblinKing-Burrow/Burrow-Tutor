@@ -119,3 +119,7 @@ By default `test:core` resolves the sibling checkout at `../Burrow-Backend`; ove
 ## Delta review
 
 On 26 October 2026, a delta review checked Tutor `e9805f5a50a49b831dc29a757ae511ef916ded11` (2026.10.25.1) against Core `4df4b424e2b2856cb2c25c8464da7f806eb661e0`. Tutor runtime examples are unchanged since the full review. The checked-in Core integration test now releases its deliberately held turn before teardown and expects Core’s default `displayMessage` metadata. This fixes fixture cleanup/expectations; it is not a new runtime capability or a test pass reported by this documentation review. No application tests were run.
+
+## 1 November full documentation reconciliation
+
+All Beginner and Advanced guides were statically compared with Tutor `5933593abf7b496a70c702e751f8c87ccb19889f`, current Core contracts and implementation, and checked-in test declarations. Current Core supports external-turn attachments and additional scheduler job kinds that this deliberately narrower lab does not expose. Generic model generation does not expose the independent chat thinking-mode control. No application tests or live providers were run; historical pass receipts remain historical.

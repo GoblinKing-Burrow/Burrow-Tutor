@@ -29,6 +29,12 @@ Tutor's route takes a bounded product `requestId`, derives a stable mod-local ke
 
 This small lab stores prompt text in ordinary settings for teaching clarity. That is not a secret/private-message vault. A production transport owns retention, privacy, per-record authorization and deletion policy.
 
+## Attachments: Core support versus this example
+
+Current Core also accepts optional normalized ChatAttachment objects in `attachments`, including inline image data URLs. Attachment content and metadata participate in the stable retry identity; omitted attachments and `[]` are equivalent. Core retains accepted attachment content in its durable receipt and the normal agent artifact lifecycle, while public turn projections omit those payloads. Use an image-capable selected model for native image input, and never submit transport download URLs or credentials. The image-content limit is 30,000,000 characters including the data-URL prefix; provider/model limits still apply.
+
+Tutor’s exact-field HTTP adapter accepts neither `attachments` nor `displayMessage`. This is a text-only teaching example, not evidence that Core or Switchboard lacks image support. Adding those fields requires adapting the example code and its durable intent/replay checks; simply adding them to the example request is rejected.
+
 ## Explicit operator control, never automatic dispatch
 
 The standalone Advanced entrypoint registers the example, but dispatch starts disabled and nothing calls it on activation, refresh, status reads, a timer, or an agent tool.
@@ -77,3 +83,4 @@ Core also exposes `agents.sessions.create({ agentId, idempotencyKey })`, `.model
 ## Source review
 
 Documentation reconciled on 25 October 2026 against Tutor `9679fc4fe9ccd532142b84b0257d290ae8d9eec3` (2026.10.25) and Core `3bf50374d3601c821e787912d52b9044eaf649ec`. This is a source review, not a new runtime test pass.
+

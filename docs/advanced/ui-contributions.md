@@ -58,6 +58,14 @@ Tutor's installed Beginner manifest declares a Settings contribution with naviga
 
 Never bootstrap a secret into UI props or HTML. Browser password inputs do not make returned data secret.
 
+## Shared confirmation and unsaved-change guards
+
+Current imperative hosts also provide `confirm(options)`, `navigate(proceed)`, and `setDraft(draft | null)`. Feature-detect all three before enabling an editor that relies on them; do not substitute an unguarded navigation callback on older hosts. `confirm({title, message, confirmLabel?, tone?})` resolves to a boolean. `navigate(() => selectItem())` goes through the shared unsaved-change guard. Neither should resume destructive work or navigation after the mount is disposed.
+
+Publish one current save scope with `setDraft({dirty, busy, save, discard})`. Each call replaces the live snapshot. `save()` returns a promise of a boolean: return true only after a successful commit and publishing a clean, not-busy scope; on validation or request failure, show the error and return false. Preserve newer edits. `discard()` restores the baseline synchronously. The host unregisters the scope on disposal, but requests and late DOM writes still need mod-side cancellation checks. Reload/close uses a browser leave warning, not the asynchronous Save/Discard/Stay dialog.
+
+Tutor's Beginner form does not yet register a shared draft or use these helpers. Its cleanup example is not a demonstration of unsaved-change protection. Adding that integration requires a code change and host-lifecycle tests; these docs do not claim it has been implemented.
+
 ## Archive
 
 The authoritative Archive contract is Core's [Archive UI contribution](https://github.com/GoblinKing-Burrow/Burrow-Tutor/blob/main/docs/mod-contract.md#ui-modules).
@@ -94,3 +102,4 @@ The imperative Settings host also supplies `runtimeScope`, `agents`, `accessApi`
 ## Verify
 
 `test/ui.test.mjs` uses a small DOM fixture to verify the installed Beginner Control refresh/error/cleanup, Beginner Settings loading/write-only secret/submission/cleanup, and the standalone Advanced Archive date query/render/abort/unmount. `test/advanced-ui-contracts.test.mjs` covers the standalone declarative Settings and `apiTargets` examples. `npm run test:core` confirms current Core discovers the two installed Beginner UI URLs; Archive stays outside that manifest by design. It does not import/mount any module in Core's browser UI. Browser integration, CSP/load timeout, and host-surface behavior remain gaps in [coverage](coverage.md).
+
