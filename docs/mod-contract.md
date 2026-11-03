@@ -109,6 +109,10 @@ See the focused [Advanced external agent-turn lesson](advanced/external-agent-tu
 
 `models.generations.submit({connectionId,model,prompt,maxTokens?,effort?,temperature?,idempotencyKey})` accepts work durably and returns `{job,replayed}`; poll `models.generations.read(jobId)` later. Stable keys are required (at most 256 characters), owner-scoped, and conflict if reused for different input. Prompts are at most 100,000 characters; returned text is bounded to 64,000. States are `queued`, `running`, `succeeded`, `failed`, or `interrupted`. No tools or chat session are involved. There is no cancel API. Startup interrupts unfinished jobs rather than replaying uncertain provider work; shutdown aborts active provider calls and drains persistence. See the [models lesson](advanced/models.md) for the consent-gated Tutor adapter and fixture limitations.
 
+### Mod-owned native agents
+
+Current Core adds `agents.owned.list/read/create/update`, owner-scoped `agents.owned.referenceImages.get/put/remove`, and activation-time `agents.context.register(provider)`. The ordinary `agents.list()` picker omits mod-owned identities whose `visibility.agents` flag is false. Ownership comes from the installed mod, not request input. These APIs are distinct from external-turn/session APIs; Tutor does not implement them. See [Agents and operator metadata](advanced/agents-operator.md#mod-owned-agents-and-per-turn-context) for input/output, lifecycle bounds and explicit coverage gaps.
+
 ### Generic Forge images (ordinary mods)
 
 ```js
@@ -119,7 +123,7 @@ await context.forge.jobs.read(jobId) // image job owned by this same mod
 
 This image-only facade uses the **operator's saved Forge image selection**. Status reports whether it resolves to an available image model without revealing connection/model IDs. Status availability is not authorization or a guarantee of successful creation. No privileged declaration is needed.
 
-Creation is asynchronous and may incur cost. Mods own product-level enablement and authorization UX. Accept only a non-empty prompt and a stable **mod-local** idempotency key; Core namespaces that key by the trusted installed mod ID before paid dispatch. Persist logical request intent before submission and the returned job ID durably; reuse the same key for retries, including after reload or a lost receipt. Return promptly, then poll `jobs.read` in later requests, not to terminal completion inside the submitting HTTP route.
+Creation is asynchronous and may incur cost. Mods own product-level enablement and authorization UX. Require a non-empty prompt and a stable **mod-local** idempotency key, with optional ordered saved `referenceImages: [{key,id,name}]` on current Core; Core namespaces that key by the trusted installed mod ID before paid dispatch. Persist logical request intent before submission and the returned job ID durably; reuse the same key for retries, including after reload or a lost receipt. Return promptly, then poll `jobs.read` in later requests, not to terminal completion inside the submitting HTTP route.
 
 Core restricts reads to image jobs created by the same mod. Returned jobs contain bounded public status, timestamps, sanitized error code and artifact metadata with authenticated `previewUrl`. Use that URL for safe DOM-based previews, not raw HTML or public sharing. Credentials, storage references, prompts, model IDs, connection IDs, download URLs and another mod's jobs are not exposed. Same-mod ownership does not replace your product's per-record authorization.
 
@@ -127,13 +131,25 @@ Submitted jobs run to success or failure. This facade has **no cancellation, att
 
 See the [Forge image lesson and runnable scaffold](forge-images.md) for consent, durable idempotency, later polling and safe preview examples. The [public Forge image guide](https://docs.goblin-kingdom.com/burrow-tutor/forge-images/) explains the current interface and runnable scaffold.
 
+### Optional mod-owned reference photos
+
+Current Core also provides `context.forge.references.get(key)`, `put(key, {fileName, content})`, and `remove(key)`. Keys are nonblank, trimmed mod-local strings of at most 160 characters, without control characters. `content` is an original PNG/JPEG/WebP base64 data URL (at most 20 MiB decoded); Core validates the image and owns the bytes. Reads/writes return metadata with an opaque authenticated `contentUrl`, not raw bytes or a public share URL; absent/removed photos return `null`. Replacing a photo rotates its ID.
+
+To illustrate with saved photos, pass an optional nonempty ordered `referenceImages: [{key, id, name}]` array to `forge.images.create`. Use the exact saved reference ID and a nonblank character name; do not pass raw image bytes, remote URLs, another mod's keys, or private storage references. Core resolves references for the trusted owning mod and binds the admitted photo identities to the image request. Persist the same ordered references with the prompt and stable key for retries. A missing or changed photo or an unsupported reference-image model must be surfaced, not silently downgraded to an unreferenced image or retried with a new paid key.
+
+This capability remains image-only and uses the operator's saved Forge model. Reference photos go to that image provider, not to an isolated text-generation request. Own the product consent, reference-edit concurrency and data-retention policy. Feature-detect reference support when supporting older Core. Tutor's bundled scaffold is still **prompt-only**: its routes do not accept reference photos and its tests do not establish this newer integration. Implementing a reference-photo editor requires product code and separate verification.
+
 ## UI modules
 
 UI is trusted browser ESM. Assets in declared UI directories can be publicly served; keep server code/secrets elsewhere. Scoped `api(path,init?)` prefixes the mod namespace.
 
 Control exports `mountControl({modId,root,api})` and may return cleanup or `{unmount}`.
 
-Settings exports lowercase-kebab `settingsSections` and `mountSettings({modId,runtimeScope,section,agents,primary,overflow,confirm,navigate,setDraft,api,accessApi,refreshAgents,saveAgentExecutionEnvironment})`. Surfaces expose `replace`, `replaceChildren`, and `clear`. The current imperative host supplies shared `confirm(options): Promise<boolean>`, `navigate(proceed)`, and `setDraft({dirty,busy,save,discard} | null)`. Drafts are one live save scope per mount; `save` returns true only after a successful commit and publication of a clean, not-busy state. The host unregisters drafts on disposal and prevents disposed confirmations/navigation from proceeding. Feature-detect all three helpers when the editor depends on them; Tutor’s Beginner form does not yet integrate these guards. Ordinary mods normally need only `section`, `primary`, and `api`. The current UI host also accepts optional module exports `settingsContribution` or `createSettingsContribution({api,accessApi,agents})` with `handleSettingsAction(actionId,values)` for Core-rendered Settings; treat the host implementation and Advanced example as the executable contract until this optional form is promoted into Backend's authoritative server docs.
+Settings section metadata supports `{id, label, layout?}`; `layout: 'form-inventory'` opts an imperative section into host-owned left overflow inventory/right primary editor placement (stacked below 640px available width). Unknown layouts retain legacy placement. Surface names describe ownership, not fixed columns. Optional `selectedAgentId` is passed to the mount; changes remount it. The inventory layout requires explicit section metadata; existing imperative modules keep their supplied surface ownership.
+
+Settings exports lowercase-kebab `settingsSections` and `mountSettings({modId,runtimeScope,section,agents,primary,overflow,confirm,navigate,setDraft,api,fetchContent,accessApi,refreshAgents,saveAgentExecutionEnvironment})`. Surfaces expose `replace`, `replaceChildren`, and `clear`. The current imperative host supplies shared `confirm(options): Promise<boolean>`, `navigate(proceed)`, and `setDraft({dirty,busy,save,discard} | null)`. Drafts are one live save scope per mount; `save` returns true only after a successful commit and publication of a clean, not-busy state. The host unregisters drafts on disposal and prevents disposed confirmations/navigation from proceeding. Feature-detect all three helpers when the editor depends on them; Tutor’s Beginner form does not yet integrate these guards. Ordinary mods normally need only `section`, `primary`, and `api`. The current UI host also accepts optional module exports `settingsContribution` or `createSettingsContribution({api,accessApi,agents})` with `handleSettingsAction(actionId,values)` for Core-rendered Settings; treat the host implementation and Advanced example as the executable contract until this optional form is promoted into Backend's authoritative server docs.
+
+Settings also receives `fetchContent(path, init?): Promise<Response>` for authenticated Core media URLs. It forces `GET` and accepts only `/api/` paths, rejecting backslashes, fragments, malformed percent-encoding and decoded dot/dotdot path segments. Unlike the mod-prefixed JSON `api`, use its Response as binary media, check `ok`, pass an abort signal and clean up object URLs. Feature-detect on older hosts. See [the Settings media guidance](advanced/ui-contributions.md#authenticated-media-in-settings).
 
 Archive exports `mountArchive({modId,root,api,date})`; `date` is `YYYY-MM-DD` or empty. Date changes remount the module. Return optional cleanup or `{unmount}` (sync or async). The scoped `api` helper supports query strings for mod-owned cursor/date protocols.
 
@@ -146,6 +162,4 @@ Burrow has no manifest `apiVersion` or Core range yet. This page plus the refere
 ## Release checklist
 
 Validate route/tool input; trust only Core identity; never return/log secrets; honor supported cancellation (external-turn cancellation is cooperative; Forge and durable-generation jobs have no cancellation API); explicitly authorize agent dispatch and paid work; retain external-turn keys/turn IDs and Forge request keys/job IDs and poll later; clean up; test activation/auth/rejection/repeat/cleanup/UI; integration-test current Core; match manifest version to tag; publish an accepted tag; and verify install/enable/use/disable/update/uninstall in development.
-
-
 

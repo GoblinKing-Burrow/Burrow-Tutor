@@ -24,11 +24,23 @@ context.api.get('/advanced/identity', route(async () => ({
 })));
 ```
 
-Use `context.id`, not a request parameter, as the installed mod identity. The agent list includes only the bounded identity, display name, and enabled state. It is useful for a picker; it does not grant authority to act as an agent, expose its workspace, or start a disabled runtime. Validate a selected ID again at the capability that consumes it.
+Use `context.id`, not a request parameter, as the installed mod identity. The agent list includes only the bounded identity, display name, and enabled state. Mod-owned identities appear only when their `visibility.agents` flag is true. It is useful for a picker; it does not grant authority to act as an agent, expose its workspace, or start a disabled runtime. Validate a selected ID again at the capability that consumes it.
 
 `displayIdentity()` exposes the stable display ID and configured display name only. It does **not** expose avatar data, profile documents, preferences, authentication identity, secrets, or authorization. It is presentation metadata, not proof that an HTTP caller is the operator. For routes, use Core's trusted `request.auth` and your product's authorization policy; never accept identity from body, query, forwarded headers, or tool arguments.
 
 `timezone()` returns Core's operator timezone. Scheduler evaluation already uses that timezone; legacy scheduler `timezone` payload fields are ignored. Displaying it can explain a cron schedule, but a mod cannot change it through this interface.
+
+## Mod-owned agents and per-turn context
+
+Current Core also exposes `context.agents.owned.list()`, `.read(agentId)`, `.create(input)`, and `.update(agentId, patch)`, plus `context.agents.context.register(provider)` during activation. These are separate from the read-only picker above. Core supplies the owner from the installed mod, and the owned-agent methods cannot adopt a regular agent or another mod's agent. Creation requires `id`, `name`, `modelConnectionId`, and `model`, with an authenticated, enabled native model selection; identity and selection are saved atomically.
+
+Optional `capabilities` flags are `a2a`, `forge`, `brains`, `mcp`, and `skills`; `visibility` flags are `agents` and `chat`. Omitted flags default false on creation and remain unchanged in an update patch. These records do not create engineering profiles, workspaces, or a Dream cycle, and do not by themselves establish runtime support for a capability.
+
+A registered provider receives `({agentId, sessionId}, {signal})` for each dependent turn and returns `{profileFiles, context}`. Both collections contain `{name, content}` string records. Names are bounded, non-path identifiers, unique within their collection; each collection allows at most 64 records, with at most 1,000,000 UTF-8 bytes overall. Invalid/excess output is rejected rather than truncated. The `sessionId` is the logical conversation, including scheduled turns, not an internal isolated execution ID. The live owning host supplies cancellation and its configured route timeout; a missing, disabled, replaced or failing provider blocks the dependent turn with `mod_agent_unavailable`. Regular agents do not require a provider.
+
+Owned portraits use `context.agents.owned.referenceImages.get(agentId)`, `.put(agentId, {fileName, content})`, and `.remove(agentId)`. They share Core's native agent reference-image store; `content` is a PNG/JPEG/WebP data URL and the original bytes are retained. These APIs are owner-scoped, not a general agent editor.
+
+Tutor has no runnable owned-agent/context-provider/portrait example or integration assertion for these APIs. This is a source-backed host contract note, not a claim that the Beginner or Advanced lab implements them. See the [coverage gaps](coverage.md#explicit-tutor-documentation-only-surfaces-and-real-gaps).
 
 ## Failure and lifecycle behavior
 
@@ -43,3 +55,4 @@ No ordinary declaration is needed. `system: true`, `systemCapabilities`, `contex
 ## Verify
 
 `test/advanced-capabilities.test.mjs` checks Tutor's payload validation and forwarding. `npm run test:core` invokes the route through Tutor's forked host and current Core capability service, verifies agent identity and operator timezone, and confirms private operator profile/avatar fields do not cross the boundary. It uses controlled stores rather than the running installation; see [coverage](coverage.md).
+

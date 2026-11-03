@@ -31,6 +31,10 @@ Queued/running is pending. A sanitized failed job is terminal failure. Keep the 
 
 The generic facade has no cancellation, attachment delivery, download operation, non-image mode, provider/model selection, or Forge configuration mutation. Never promise those controls or pass an `AbortSignal` as though job cancellation existed.
 
+## Saved portraits
+
+Current Core additionally offers mod-owned `forge.references.get/put/remove` and optional ordered `referenceImages: [{key,id,name}]` on image creation. See [the reference-photo contract](../forge-images.md#optional-mod-owned-reference-photos) for ownership, authenticated media, exact saved identities and retry requirements. Tutor’s bundled scaffold remains prompt-only; this describes Core support, not a newly implemented Tutor editor.
+
 ## Boundary
 
 No `system: true`, `systemCapabilities`, provider SDK, or MCP grant is needed. Conversely, a tool grant is not paid-work consent. Tutor intentionally registers no image tool. If a product adds one, it must enforce trusted caller policy and paid-work authorization in addition to Core grants.

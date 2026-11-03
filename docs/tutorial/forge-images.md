@@ -36,11 +36,19 @@ await context.settings.set(`image-job:${requestId}`, job.id);
 // Return the receipt now. It is not a finished image.
 ```
 
-`create` accepts only a non-empty prompt and **mod-local idempotency key**. Do not pass a mode, provider, model, connection, owner, or configuration. Core namespaces the key by the trusted installed mod ID before paid dispatch. Do not manually add another mod's ID, generate a fresh key on retry, or use the prompt alone as the key: two intentionally separate images may share a prompt.
+`create` requires a non-empty prompt and **mod-local idempotency key** and also accepts optional saved `referenceImages` on current Core (see below). Do not pass a mode, provider, model, connection, owner, or configuration. Core namespaces the key by the trusted installed mod ID before paid dispatch. Do not manually add another mod's ID, generate a fresh key on retry, or use the prompt alone as the key: two intentionally separate images may share a prompt.
 
 The runnable scaffold is stronger than this minimal API illustration: it saves a prompt digest and empty job receipt **before** dispatch, serializes identical request IDs within one host, rejects reuse for a different prompt, then persists the returned job ID before replying. If a reply or receipt write is lost, resubmit the same request with the same prompt and request ID: Core can replay the receipt without another paid dispatch while the saved selection remains compatible. Changing the saved image selection between dispatch and recovery can return an idempotency conflict. Keep the original request key, investigate the existing job, and never automatically mint a new paid key to bypass that conflict. A local prompt mismatch is a conflict, never a reason to silently mint a new paid key.
 
 Persist job IDs durably, not in a module variable. They are needed after reload and for later reads. In this small example settings hold one record per request; no raw prompt is persisted there. A larger product must own transactional storage, retention, locking, backup and migration. Do not prune an outstanding intent just because a request timed out; losing its stable key can turn a retry into a second paid request. A route/transport error is not proof that dispatch never happened.
+
+## Optional mod-owned reference photos
+
+Current Core also provides `context.forge.references.get(key)`, `put(key, {fileName, content})`, and `remove(key)`. Keys are nonblank, trimmed mod-local strings of at most 160 characters, without control characters. `content` is an original PNG/JPEG/WebP base64 data URL (at most 20 MiB decoded); Core validates the image and owns the bytes. Reads/writes return metadata with an opaque authenticated `contentUrl`, not raw bytes or a public share URL; absent/removed photos return `null`. Replacing a photo rotates its ID.
+
+To illustrate with saved photos, pass an optional nonempty ordered `referenceImages: [{key, id, name}]` array to `forge.images.create`. Use the exact saved reference ID and a nonblank character name; do not pass raw image bytes, remote URLs, another mod's keys, or private storage references. Core resolves references for the trusted owning mod and binds the admitted photo identities to the image request. Persist the same ordered references with the prompt and stable key for retries. A missing or changed photo or an unsupported reference-image model must be surfaced, not silently downgraded to an unreferenced image or retried with a new paid key.
+
+This capability remains image-only and uses the operator's saved Forge model. Reference photos go to that image provider, not to an isolated text-generation request. Own the product consent, reference-edit concurrency and data-retention policy. Feature-detect reference support when supporting older Core. Tutor's bundled scaffold is still **prompt-only**: its routes do not accept reference photos and its tests do not establish this newer integration. Implementing a reference-photo editor requires product code and separate verification.
 
 ## 4. Read later, don't wait inside the submitting route
 
@@ -101,4 +109,3 @@ The runnable scaffold limits prompt length to 10,000 characters and request IDs 
 ## Verify without spending money
 
 `npm test` covers input/auth/consent, intent/receipt persistence failure, stable retry across reload, and existing UI behavior. `npm run test:core` discovers the packaged mod and exercises its forked host against current Core's actual generic-capability service: availability, owner scoping, asynchronous receipts, replay, bounded public artifacts and later job reads. The paid Forge store is an in-memory stand-in: these checks do **not** call a provider or claim live PostgreSQL/provider verification.
-

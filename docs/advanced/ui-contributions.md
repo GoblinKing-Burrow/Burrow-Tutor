@@ -47,6 +47,10 @@ export function mountSettings({ section, primary, overflow, api }) {
 }
 ```
 
+`primary` and `overflow` describe semantic mount ownership, not fixed left/right columns. A section may opt into `layout: 'form-inventory'` in its `settingsSections` metadata: the host places the bounded overflow inventory left and the complete primary editor right, stacking them below 640px of available width. Unknown layout values keep legacy placement. Existing imperative modules do not acquire this layout automatically; populate the supplied surfaces without creating another column shell or swapping their save scopes.
+
+The imperative context may also include `selectedAgentId`. A changed selected agent remounts the contribution, so keep selection-dependent state within that mount and dispose its requests. Tutor's Beginner example does not opt into the inventory layout or implement an agent-specific editor.
+
 The full host context also includes `modId`, `runtimeScope`, agents, `accessApi`, `refreshAgents`, and execution-environment helpers. Ordinary products should use only what their documented UI requires. `accessApi` addresses Core's operator-owned privileged capability policy; it is not needed by Tutor's ordinary settings.
 
 Tutor's installed Beginner manifest declares a Settings contribution with navigation and primary presentation. The copyable signature above shows the optional overflow surface for products that declare an inventory column. The Beginner form:
@@ -57,6 +61,12 @@ Tutor's installed Beginner manifest declares a Settings contribution with naviga
 - aborts pending work and removes listeners/surfaces on cleanup.
 
 Never bootstrap a secret into UI props or HTML. Browser password inputs do not make returned data secret.
+
+## Authenticated media in Settings
+
+Current imperative Settings hosts also provide `fetchContent(path, init?): Promise<Response>`. Use it for a Core-returned authenticated media URL, such as a saved reference photo's `contentUrl`; then read `response.blob()` for a preview. This is different from the JSON-only, mod-prefixed `api` helper. Feature-detect `fetchContent` on older hosts and show an unavailable preview rather than constructing a public URL or routing binary media through a Mod JSON endpoint.
+
+The helper forces `GET`, preserves normal Core authentication, and accepts only `/api/` paths. It rejects backslashes, fragments, malformed percent-encoding and decoded `.`/`..` path segments. Pass the mount's abort signal, check `response.ok`, guard late results after disposal, and revoke object URLs when replacing a preview or unmounting. These host path checks do not replace the media endpoint's authorization. Tutor's current Beginner settings do not implement a media editor.
 
 ## Shared confirmation and unsaved-change guards
 

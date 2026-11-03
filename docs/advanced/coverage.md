@@ -96,6 +96,8 @@ All operations below require an active tool invocation. The common authority is 
 These are current documented host surfaces, but there is no runnable Tutor implementation for them today:
 
 - manifest `managedSkills` contributions and bundled skill packages;
+- mod-owned native identities, owned portraits and activation-time per-turn context providers;
+- imperative Settings `form-inventory` layout metadata and `selectedAgentId` remount behavior;
 - full product examples for Settings host arguments `runtimeScope`, `accessApi`, `refreshAgents`, and `saveAgentExecutionEnvironment` (the standalone declarative factory does demonstrate `agents`);
 - a dedicated four-concurrent-capability/timeout/shutdown stress example;
 - `displayMessage`, turn cancellation, and mod-owned session creation/model controls (available in Core, not exposed by Tutor’s lab).
@@ -123,3 +125,7 @@ On 26 October 2026, a delta review checked Tutor `e9805f5a50a49b831dc29a757ae511
 ## 1 November full documentation reconciliation
 
 All Beginner and Advanced guides were statically compared with Tutor `5933593abf7b496a70c702e751f8c87ccb19889f`, current Core contracts and implementation, and checked-in test declarations. Current Core supports external-turn attachments and additional scheduler job kinds that this deliberately narrower lab does not expose. Generic model generation does not expose the independent chat thinking-mode control. No application tests or live providers were run; historical pass receipts remain historical.
+
+## 3 November host-contract delta review
+
+Tutor `851ac61b6388104dfa093d6d68c3ad6f1f0ba575` is unchanged since the preceding daily review. A focused static check against Core `32dde3266a231777ddfec6dba141d6b9972a21fd` and UI `4a17a8c73c588a7582835ca6ff50dcabe409c33c` reconciled the filtered agent picker, owned-agent/context-provider APIs, and imperative Settings layout/selected-agent contract. These additions are documentation-only in Tutor. Existing source annotations and test receipts remain historical; no application, external-chat or live-provider tests were run.
