@@ -23,6 +23,8 @@ Tutor clears managed protected-reference records and logs stop. UI modules indep
 
 Fresh installs start disabled. Enabling starts the host and publishes routes/tools/UI. Disable, crash, or stop revokes live routing; tool catalog/grants survive disable for re-enable, while uninstall removes catalog/grants. Updates preserve enabled state. Settings, secrets, and mod-data survive update and uninstall, so provide explicit data deletion where needed.
 
+Discovery skips Core-owned update/uninstall staging siblings named `<id>.backup-<UUID>`, `<id>.uninstall-<UUID>` and `<id>.uninstall-<UUID>.recovery` when the suffix is a generated version-4 UUID. Their preserved manifests do not make them additional installed mods. Hidden directories and the reserved `mod-data` directory are also excluded. This is discovery filtering, not permission to delete retained data or a general rule that arbitrary similarly named directories are ignored.
+
 `system: true` is a privileged trust classification, not special lifecycle. Ordinary mods must not declare `systemCapabilities`.
 
 ### Optional managed skills (documentation-only in Tutor)

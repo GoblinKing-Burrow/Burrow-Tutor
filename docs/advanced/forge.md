@@ -13,6 +13,8 @@ const receipt = await context.forge.images.create({
 const job = await context.forge.jobs.read(receipt.job.id);
 ```
 
+The ordinary mod facade remains asynchronous. Core's native agent tool `forge_create_job` now waits for generation and sends results to its trusted chat destination, but that behavior does not apply to `context.forge.images.create()`. This lesson still returns a job receipt and requires later reads and product-owned display; it gains no automatic chat attachment delivery.
+
 ## Safe flow
 
 1. Read status. `available` means the operator's saved image selection currently resolves; it is not consent, a quote, or a success guarantee.

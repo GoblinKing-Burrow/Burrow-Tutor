@@ -4,6 +4,8 @@ An ordinary mod can request an image through Core's **generic, image-only** Forg
 
 See the [mod author contract](contract.md) and the repository’s [canonical contract](https://github.com/GoblinKing-Burrow/Burrow-Tutor/blob/main/docs/mod-contract.md). Test against the Core release you support.
 
+The ordinary mod facade remains asynchronous. Core's native agent tool `forge_create_job` now waits for generation and sends results to its trusted chat destination, but that behavior does not apply to `context.forge.images.create()`. This lesson still returns a job receipt and requires later reads and product-owned display; it gains no automatic chat attachment delivery.
+
 ## 1. Check the operator's saved selection
 
 ```js
