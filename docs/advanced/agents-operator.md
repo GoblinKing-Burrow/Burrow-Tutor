@@ -56,3 +56,8 @@ No ordinary declaration is needed. `system: true`, `systemCapabilities`, `contex
 
 `test/advanced-capabilities.test.mjs` checks Tutor's payload validation and forwarding. `npm run test:core` invokes the route through Tutor's forked host and current Core capability service, verifies agent identity and operator timezone, and confirms private operator profile/avatar fields do not cross the boundary. It uses controlled stores rather than the running installation; see [coverage](coverage.md).
 
+## Current Core completion feed
+
+Checked **7 November 2026**: `context.agents.runs.onCompleted(handler)`, `.list({cursor, limit?})`, and `.activity({agentIds?})` provide generic completion/activity metadata. The callback is an advisory cursor wake-up, so catch up on activation, persist a durable checkpoint and make downstream work idempotent. Events do not contain transcripts or credentials. Activity may report `response_pending`, meaning model work has retired but its HTTP answer has not finished; readiness is not an exclusive reservation.
+
+See the [full Core completion contract](https://docs.goblin-kingdom.com/burrow/development/extensions/#durable-agent-run-completion-metadata) for pagination, trusted origin fields and delivery/retention caveats. Tutor does not expose runnable routes or integration coverage for this new surface. Adapting the lab requires implementation and negative tests, not just this documentation note.

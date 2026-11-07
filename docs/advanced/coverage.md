@@ -129,3 +129,7 @@ All Beginner and Advanced guides were statically compared with Tutor `5933593abf
 ## 3 November host-contract delta review
 
 Tutor `851ac61b6388104dfa093d6d68c3ad6f1f0ba575` is unchanged since the preceding daily review. A focused static check against Core `32dde3266a231777ddfec6dba141d6b9972a21fd` and UI `4a17a8c73c588a7582835ca6ff50dcabe409c33c` reconciled the filtered agent picker, owned-agent/context-provider APIs, and imperative Settings layout/selected-agent contract. These additions are documentation-only in Tutor. Existing source annotations and test receipts remain historical; no application, external-chat or live-provider tests were run.
+
+## 7 November Core-only additions
+
+Core's durable agent-run completion feed and live activity metadata are documented in [Agents and operator](agents-operator.md#current-core-completion-feed). They are not implemented or tested by Tutor's current lab. Scheduler restart/terminal-receipt changes are described in [Scheduler](scheduler.md#current-core-restart-receipts); this documentation-only reconciliation did not rerun application or integration tests.

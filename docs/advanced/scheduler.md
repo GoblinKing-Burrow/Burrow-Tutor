@@ -86,3 +86,6 @@ Owner scoping cannot be overridden by body fields, tool arguments, installation,
 
 `test/advanced-capabilities.test.mjs` verifies owner fields are not accepted, jobs default disabled, model selectors are paired, and trigger returns promptly. Archive UI tests exercise a list consumer. `npm run test:core` executes create/list/read/update/run-history/trigger/delete through Tutor's forked host and current Core owner-scoped scheduler capability using controlled durable-store semantics. Foreign-owner isolation, cursor limits, selected-model rejection, operator-timezone inheritance during dispatch, and unavailable-owner behavior remain focused gaps. See [coverage](coverage.md).
 
+## Current Core restart receipts
+
+Checked **7 November 2026**: Core can reconcile an interrupted scheduled run from its exact staged terminal result, matching task result, or committed chat continuity plus matching terminal receipt and assistant turn. It does not rerun the prompt to reconstruct an answer. Missing evidence leaves a missed run; a receipt-write failure is separate from execution failure. Invalid/unresolvable schedules are disabled with a failed schedule receipt so valid jobs can continue. These are current Core contracts, not new Tutor adapter fields or newly executed Tutor tests.
