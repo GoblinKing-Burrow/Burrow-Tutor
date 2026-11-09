@@ -62,6 +62,12 @@ Tutor's installed Beginner manifest declares a Settings contribution with naviga
 
 Never bootstrap a secret into UI props or HTML. Browser password inputs do not make returned data secret.
 
+## Current host layouts and entity selection
+
+Current imperative hosts recognize `form`, `form-wide`, `document` and `form-inventory` section layouts. A simple complete form can use `form`; do not create a second column shell to imitate the host. The host also provides `setEntitySelector({label,items,selectedId,onSelect,addLabel?,onAdd?} | null)` for its native shared selector and `navigateSection(sectionId, beforeNavigate?)` for guarded subsection changes. Register the selected entity with the host rather than maintaining a competing navigation bar, and clear mount-owned state during disposal.
+
+These are current UI-host contracts used by other mods, not features demonstrated by Tutor's Beginner form. Feature-detect helpers when supporting older UI builds; the existing shared draft/confirmation rules still apply. Check the matching host's `SettingsEntityItem` shape when adapting an entity picker.
+
 ## Authenticated media in Settings
 
 Current imperative Settings hosts also provide `fetchContent(path, init?): Promise<Response>`. Use it for a Core-returned authenticated media URL, such as a saved reference photo's `contentUrl`; then read `response.blob()` for a preview. This is different from the JSON-only, mod-prefixed `api` helper. Feature-detect `fetchContent` on older hosts and show an unavailable preview rather than constructing a public URL or routing binary media through a Mod JSON endpoint.

@@ -113,6 +113,10 @@ See the focused [Advanced external agent-turn lesson](advanced/external-agent-tu
 
 Current Core adds `agents.owned.list/read/create/update`, owner-scoped `agents.owned.referenceImages.get/put/remove`, and activation-time `agents.context.register(provider)`. The ordinary `agents.list()` picker omits mod-owned identities whose `visibility.agents` flag is false. Ownership comes from the installed mod, not request input. These APIs are distinct from external-turn/session APIs; Tutor does not implement them. See [Agents and operator metadata](advanced/agents-operator.md#mod-owned-agents-and-per-turn-context) for input/output, lifecycle bounds and explicit coverage gaps.
 
+### Shared context and completion metadata
+
+Core also exposes activation-time `agents.context.registerShared(provider)` for bounded shared support text, distinct from owned-agent identity context, and `agents.runs.onCompleted/list/activity` for durable completion metadata and live activity. A completion callback is an advisory wake-up, not a durable delivery queue: read the paged feed, persist a cursor and make downstream work idempotent. Neither interface grants tool authority or publishes transcripts. Tutor has no runnable adapter/tests for these surfaces. See [shared context](advanced/agents-operator.md#shared-context-providers-documentation-only-in-tutor) and [completion-feed guidance](advanced/agents-operator.md#current-core-completion-feed).
+
 ### Generic Forge images (ordinary mods)
 
 ```js
