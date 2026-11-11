@@ -137,3 +137,7 @@ Core's durable agent-run completion feed and live activity metadata are document
 ## 8 November 2026 full documentation reconciliation
 
 All Beginner and Advanced lessons, the canonical mod contract, runnable examples and test definitions were statically compared. Shared-context registration and current Settings layouts/entity navigation were added as documentation-only host contracts, not implemented Tutor examples. Existing narrower payload adapters, explicit consent, receipt/retry boundaries and historical test coverage remain distinguished from Core support. Reviewed source `93af5ed128f47d7f3259d648773404fb24a7a3d7` against Core assembly `1f77c9d0277585bfe1963ce3ab3d2cdf35f16b9a`. No application tests, live chat/provider calls, paid generation, runtime edits or skill scripts were run. Documentation checks are separate from application acceptance.
+
+## 10 November host-contract delta
+
+Core's opt-in hidden-identity directory and the main UI panel's query forwarding are documented in [Agents and operator](agents-operator.md#hidden-identity-discovery-compatibility) and [UI contributions](ui-contributions.md). Tutor's identity route still uses default visible discovery. No new Tutor runnable route or browser integration coverage is implied; the Core/UI source and focused test definitions were inspected statically, not executed.

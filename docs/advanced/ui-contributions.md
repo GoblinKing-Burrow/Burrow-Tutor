@@ -14,7 +14,7 @@ UI modules are trusted installed browser ESM, not a sandbox. Declare only files 
 }
 ```
 
-Core validates safe installed asset paths and exposes URLs only while the mod is available. Each module receives a scoped `api(path, init?)` helper that prefixes `/api/mods/<mod-id>`. Use relative mod paths such as `/status`, never reconstruct the namespace from untrusted input.
+Core validates safe installed asset paths and exposes URLs only while the mod is available. Each module receives a scoped `api(path, init?)` helper that prefixes `/api/mods/<mod-id>`. Use relative mod paths such as `/status`, never reconstruct the namespace from untrusted input. Checked **10 November 2026**: the main panel helper also forwards query strings, for example `/status?limit=25`, under the same declaring-mod prefix. Encode values with `URLSearchParams`. It rejects path traversal, backslashes, encoded dot/slash/backslash path sequences and fragments; encoded query values remain intact. This aligns main-panel query behavior with the Archive helper, not a new Tutor route or authorization bypass.
 
 ## Control
 
@@ -118,4 +118,3 @@ The imperative Settings host also supplies `runtimeScope`, `agents`, `accessApi`
 ## Verify
 
 `test/ui.test.mjs` uses a small DOM fixture to verify the installed Beginner Control refresh/error/cleanup, Beginner Settings loading/write-only secret/submission/cleanup, and the standalone Advanced Archive date query/render/abort/unmount. `test/advanced-ui-contracts.test.mjs` covers the standalone declarative Settings and `apiTargets` examples. `npm run test:core` confirms current Core discovers the two installed Beginner UI URLs; Archive stays outside that manifest by design. It does not import/mount any module in Core's browser UI. Browser integration, CSP/load timeout, and host-surface behavior remain gaps in [coverage](coverage.md).
-

@@ -24,7 +24,7 @@ context.api.get('/advanced/identity', route(async () => ({
 })));
 ```
 
-Use `context.id`, not a request parameter, as the installed mod identity. The agent list includes only the bounded identity, display name, and enabled state. Mod-owned identities appear only when their `visibility.agents` flag is true. It is useful for a picker; it does not grant authority to act as an agent, expose its workspace, or start a disabled runtime. Validate a selected ID again at the capability that consumes it.
+Use `context.id`, not a request parameter, as the installed mod identity. The agent list includes only the bounded identity, display name, and enabled state. By default, mod-owned identities appear only when their `visibility.agents` flag is true. Current Core also accepts `context.agents.list({ includeHidden: true })` to include registered hidden identities. Both modes retain disabled identities as `enabled: false` for historical attribution, without exposing profiles, ownership or capability/visibility settings. It is useful for a picker; it does not grant authority to act as an agent, expose its workspace, or start a disabled runtime. Validate a selected ID again at the capability that consumes it.
 
 `displayIdentity()` exposes the stable display ID and configured display name only. It does **not** expose avatar data, profile documents, preferences, authentication identity, secrets, or authorization. It is presentation metadata, not proof that an HTTP caller is the operator. For routes, use Core's trusted `request.auth` and your product's authorization policy; never accept identity from body, query, forwarded headers, or tool arguments.
 
@@ -67,3 +67,8 @@ No ordinary declaration is needed. `system: true`, `systemCapabilities`, `contex
 Checked **7 November 2026**: `context.agents.runs.onCompleted(handler)`, `.list({cursor, limit?})`, and `.activity({agentIds?})` provide generic completion/activity metadata. The callback is an advisory cursor wake-up, so catch up on activation, persist a durable checkpoint and make downstream work idempotent. Events do not contain transcripts or credentials. Activity may report `response_pending`, meaning model work has retired but its HTTP answer has not finished; readiness is not an exclusive reservation.
 
 See the [full Core completion contract](https://docs.goblin-kingdom.com/burrow/development/extensions/#durable-agent-run-completion-metadata) for pagination, trusted origin fields and delivery/retention caveats. Tutor does not expose runnable routes or integration coverage for this new surface. Adapting the lab requires implementation and negative tests, not just this documentation note.
+
+
+## Hidden-identity discovery compatibility
+
+Checked **10 November 2026**: the generic Core directory accepts only an optional boolean `includeHidden`; other keys and nonboolean values are rejected. The default remains panel-visible discovery, and opting in does not change panel configuration or agent permissions. Tutor's `GET /advanced/identity` example still calls `context.agents.list()` without options, so it does not expose hidden identities or accept a new request flag. The Core directory's focused test definitions cover projection, validation and child-host forwarding; this documentation pass did not execute them or add Tutor integration coverage.
