@@ -89,3 +89,7 @@ Owner scoping cannot be overridden by body fields, tool arguments, installation,
 ## Current Core restart receipts
 
 Checked **7 November 2026**: Core can reconcile an interrupted scheduled run from its exact staged terminal result, matching task result, or committed chat continuity plus matching terminal receipt and assistant turn. It does not rerun the prompt to reconstruct an answer. Missing evidence leaves a missed run; a receipt-write failure is separate from execution failure. Invalid/unresolvable schedules are disabled with a failed schedule receipt so valid jobs can continue. These are current Core contracts, not new Tutor adapter fields or newly executed Tutor tests.
+
+## Native tools are a separate pagination contract
+
+Checked **12 November 2026**: Core’s native agent scheduler tools now use scoped opaque cursors and explicit page counts. The mod-owned scheduler facade taught here remains separate, including its existing limit of 100; do not pass native cursor fields to this lab or infer that it exposes new routes.

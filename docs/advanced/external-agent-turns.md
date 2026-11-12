@@ -84,3 +84,12 @@ Core also exposes `agents.sessions.create({ agentId, idempotencyKey })`, `.model
 
 Documentation reconciled on 25 October 2026 against Tutor `9679fc4fe9ccd532142b84b0257d290ae8d9eec3` (2026.10.25) and Core `3bf50374d3601c821e787912d52b9044eaf649ec`. This is a source review, not a new runtime test pass.
 
+## Current Core output attachments
+
+Checked **12 November 2026**: Terminal `agents.turns.read` results can include `attachments`, a durable list of byte-free `{ id, name, mimeType, sizeBytes }` descriptors. Core captures only the assistant output and native provider artifacts belonging to that exact agent/session/run, not input uploads, prior turns or a session-tail guess.
+
+`context.agents.turns.readAttachment(turnId, attachmentId)` reads only an attachment listed on a receipt owned by the calling mod. It returns `{ name, mimeType, sizeBytes, encoding: "base64", content }`, with raw base64 rather than a data URL. Reads are capped at 32 MiB decoded bytes; larger descriptors can remain visible but fail with `mod_external_turn_attachment_too_large`. Missing, expired, replaced or unsafe artifact bytes fail as not found. Durable receipt metadata is not a promise of permanent byte retention.
+
+Forge delivery accepts existing database session identities, including transport/mod identities, rather than assuming a filesystem slug. Explicit artifact delivery is bound to the originating run; reusing another run’s generation identity conflicts. A terminal turn snapshot is not broadened by a late generation after cancellation. Receipt ownership does not replace the mod’s recipient authorization.
+
+These are current Core host capabilities, not additional Tutor HTTP routes. This lab still demonstrates submit/read only and does not expose an attachment-download route.
