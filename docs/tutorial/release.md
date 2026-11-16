@@ -48,3 +48,11 @@ Document required Core versions, granted tools, data retention, any migration st
 
 Keep the public contract and reference implementation in sync when interfaces change. Preserve license/copyright notices and follow the license’s requirements for modified copies.
 
+
+## Tutor maintainer publication checklist
+
+Tutor's established `.github/workflows/release.yml` runs on a human push to development `main` or manual dispatch. It runs standalone gates, assigns an unused UTC calendar version, updates **both** manifest/package through `scripts/set-release-version.mjs`, verifies identity, commits the version-only change, pushes `main`, creates an annotated matching tag and a development GitHub release. Do not manually invent a version/tag before that job. Its bot guard prevents release loops. Public promotion to `GoblinKing-Burrow` is separate (the guides describe the daily sync); a development release is not proof of public publication.
+
+For the native-capability lab, the reviewer should run `npm run build`, `npm test`, `npm run test:core` against the intended Core checkout and `git diff --check` before authorizing publication. The verification workflow now includes the standalone Advanced/Forge checks and both Core integration files when `BURROW_CORE_READ_TOKEN` is configured; without the token it explicitly skips Core. The release job itself does **not** checkout Core or run integration, so retain a separate successful integration receipt rather than treating a release success as equivalent.
+
+After parent review and authorized publication, verify the workflow result, matching package/manifest at the annotated tag, development release assets/source, public promotion/sync and accepted tag discoverability. Then refresh the Git source and test the exact tagged install/enable/use/disable/update/uninstall in development. No local test here performs those deployment steps or browser mounting. No release, version bump, commit, push or live settings change is required to review this patch.

@@ -95,7 +95,7 @@ export function mountArchive({ modId, root, api, date }) {
 }
 ```
 
-`date` is `YYYY-MM-DD` or empty for all dates. Core remounts on date changes; do not assume an `update()` callback. Cleanup may be a function or `{unmount}` and may be sync or async. Query strings are supported by the scoped helper.
+`date` is `YYYY-MM-DD` or empty for all dates. Current Core also supplies `timeZone`, `filters: {search, participantId, category}`, and, when a shared header surface exists, `configureHeader(...)` for native category/search/participant controls. A mount that returns `{update(context), unmount()}` receives changed date, timezone or filters through `update`; legacy mounts without `update` are remounted. Tutor returns only `unmount`, so its current example still remounts. Feature-detect optional helpers on older hosts. Cleanup may be a function or `{unmount}`. Query strings are supported by the scoped helper.
 
 Tutor displays a read-only page of its owner-scoped scheduler jobs. Its backend currently ignores `date`; the source says so. Therefore this is a mount/query/cancellation demonstration, **not** a claim that Tutor implements date filtering or complete cursor pagination. A real Archive product owns date semantics, cursor protocol, storage, retention, filtering, authorization, and empty/error states. Archive is not a Core audit store or authentication bypass.
 
@@ -118,3 +118,8 @@ The imperative Settings host also supplies `runtimeScope`, `agents`, `accessApi`
 ## Verify
 
 `test/ui.test.mjs` uses a small DOM fixture to verify the installed Beginner Control refresh/error/cleanup, Beginner Settings loading/write-only secret/submission/cleanup, and the standalone Advanced Archive date query/render/abort/unmount. `test/advanced-ui-contracts.test.mjs` covers the standalone declarative Settings and `apiTargets` examples. `npm run test:core` confirms current Core discovers the two installed Beginner UI URLs; Archive stays outside that manifest by design. It does not import/mount any module in Core's browser UI. Browser integration, CSP/load timeout, and host-surface behavior remain gaps in [coverage](coverage.md).
+
+
+### Layout metadata and entity selection
+
+The alternative imperative [`entity-settings.example.js`](../../ui/entity-settings.example.js) demonstrates `settingsSections` with `layout:'form-wide'` and the current host's `setEntitySelector` callback. Read the [native lab walkthrough](native-agents.md#settings-layout-and-selection) for the exact `{id,label}` item shape, lifecycle cleanup and browser-testing limits. This is a UI-host contract, not a Backend capability or new permission.

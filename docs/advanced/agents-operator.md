@@ -66,9 +66,11 @@ No ordinary declaration is needed. `system: true`, `systemCapabilities`, `contex
 
 Checked **7 November 2026**: `context.agents.runs.onCompleted(handler)`, `.list({cursor, limit?})`, and `.activity({agentIds?})` provide generic completion/activity metadata. The callback is an advisory cursor wake-up, so catch up on activation, persist a durable checkpoint and make downstream work idempotent. Events do not contain transcripts or credentials. Activity may report `response_pending`, meaning model work has retired but its HTTP answer has not finished; readiness is not an exclusive reservation.
 
-See the [full Core completion contract](https://docs.goblin-kingdom.com/burrow/development/extensions/#durable-agent-run-completion-metadata) for pagination, trusted origin fields and delivery/retention caveats. Tutor does not expose runnable routes or integration coverage for this new surface. Adapting the lab requires implementation and negative tests, not just this documentation note.
+See the [full Core completion contract](https://docs.goblin-kingdom.com/burrow/development/extensions/#durable-agent-run-completion-metadata) for pagination, trusted origin fields and delivery/retention caveats. At that review, Tutor did not expose runnable routes or integration coverage. The later [native lab](native-agents.md) now supplies a tested standalone example; its coverage limits remain explicit.
 
 
 ## Hidden-identity discovery compatibility
 
 Checked **10 November 2026**: the generic Core directory accepts only an optional boolean `includeHidden`; other keys and nonboolean values are rejected. The default remains panel-visible discovery, and opting in does not change panel configuration or agent permissions. Tutor's `GET /advanced/identity` example still calls `context.agents.list()` without options, so it does not expose hidden identities or accept a new request flag. The Core directory's focused test definitions cover projection, validation and child-host forwarding; this documentation pass did not execute them or add Tutor integration coverage.
+
+For the newer owner-scoped native identity, capability/visibility, per-turn/shared context, portrait and activity APIs, follow the [runnable native-agent lab](native-agents.md). It is separate from the Beginner install and never starts inference at activation.

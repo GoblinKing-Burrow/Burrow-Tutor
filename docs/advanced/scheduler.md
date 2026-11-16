@@ -51,7 +51,7 @@ do {
 } while (runCursor);
 ```
 
-Lists default to 50 and cap at 100. Cursors are opaque; repeat the same filter and follow `nextCursor` only while `hasMore` is true. Scheduler pages are not documented as immutable snapshots, so consumers that need durable export must tolerate live changes and deduplicate stable IDs.
+Lists default to 50 and cap at 100, with a separate 240,000-byte serialized JSON page budget. A page can therefore contain fewer records than the requested limit. Run-history entries that cannot fit individually are projected to metadata with `result: { truncated: true, reason: "scheduled_job_run_output_limit" }`; this is not the full execution result. Cursors are opaque; repeat the same filter and follow `nextCursor` only while `hasMore` is true. Scheduler pages are not documented as immutable snapshots, so consumers that need durable export must tolerate live changes and deduplicate stable IDs.
 
 Manual trigger uses the shared scheduler. A 202-style Tutor route response means accepted/receipted, not that an agent run succeeded. Inspect run history later. Delete responses should likewise be treated according to Core's returned record, not as proof that previously dispatched work was undone.
 
@@ -93,3 +93,4 @@ Checked **7 November 2026**: Core can reconcile an interrupted scheduled run fro
 ## Native tools are a separate pagination contract
 
 Checked **12 November 2026**: Core’s native agent scheduler tools now use scoped opaque cursors and explicit page counts. The mod-owned scheduler facade taught here remains separate, including its existing limit of 100; do not pass native cursor fields to this lab or infer that it exposes new routes.
+

@@ -127,7 +127,7 @@ await context.forge.jobs.read(jobId) // image job owned by this same mod
 
 This image-only facade uses the **operator's saved Forge image selection**. Status reports whether it resolves to an available image model without revealing connection/model IDs. Status availability is not authorization or a guarantee of successful creation. No privileged declaration is needed.
 
-Creation is asynchronous and may incur cost. Mods own product-level enablement and authorization UX. Require a non-empty prompt and a stable **mod-local** idempotency key, with optional ordered saved `referenceImages: [{key,id,name}]` on current Core; Core namespaces that key by the trusted installed mod ID before paid dispatch. Persist logical request intent before submission and the returned job ID durably; reuse the same key for retries, including after reload or a lost receipt. Return promptly, then poll `jobs.read` in later requests, not to terminal completion inside the submitting HTTP route.
+Creation is asynchronous and may incur cost. Mods own product-level enablement and authorization UX. Require a non-empty prompt (at most 100,000 UTF-16 code units) and a stable **mod-local** idempotency key (at most 256 UTF-16 code units), with optional ordered saved `referenceImages: [{key,id,name}]` on current Core; Core namespaces that key by the trusted installed mod ID before paid dispatch. Persist logical request intent before submission and the returned job ID durably; reuse the same key for retries, including after reload or a lost receipt. Return promptly, then poll `jobs.read` in later requests, not to terminal completion inside the submitting HTTP route.
 
 Core restricts reads to image jobs created by the same mod. Returned jobs contain bounded public status, timestamps, sanitized error code and artifact metadata with authenticated `previewUrl`. Use that URL for safe DOM-based previews, not raw HTML or public sharing. Credentials, storage references, prompts, model IDs, connection IDs, download URLs and another mod's jobs are not exposed. Same-mod ownership does not replace your product's per-record authorization.
 
@@ -155,7 +155,7 @@ Settings exports lowercase-kebab `settingsSections` and `mountSettings({modId,ru
 
 Settings also receives `fetchContent(path, init?): Promise<Response>` for authenticated Core media URLs. It forces `GET` and accepts only `/api/` paths, rejecting backslashes, fragments, malformed percent-encoding and decoded dot/dotdot path segments. Unlike the mod-prefixed JSON `api`, use its Response as binary media, check `ok`, pass an abort signal and clean up object URLs. Feature-detect on older hosts. See [the Settings media guidance](advanced/ui-contributions.md#authenticated-media-in-settings).
 
-Archive exports `mountArchive({modId,root,api,date})`; `date` is `YYYY-MM-DD` or empty. Date changes remount the module. Return optional cleanup or `{unmount}` (sync or async). The scoped `api` helper supports query strings for mod-owned cursor/date protocols.
+Archive exports `mountArchive({modId,root,api,date,timeZone,filters,configureHeader?})`; `date` is `YYYY-MM-DD` or empty. Current Core calls a returned `update(context)` on date/timezone/filter changes, or remounts legacy modules without it. Return optional cleanup or `{unmount,update?}`. The optional `configureHeader` registers native search, participant and category controls when the host provides a shared header surface; `filters` contains `search`, `participantId` and `category`. Tutor’s example returns only `unmount` and does not implement these filters. The scoped `api` helper supports query strings for mod-owned cursor/date protocols.
 
 ## Lifecycle and compatibility
 
@@ -167,3 +167,8 @@ Burrow has no manifest `apiVersion` or Core range yet. This page plus the refere
 
 Validate route/tool input; trust only Core identity; never return/log secrets; honor supported cancellation (external-turn cancellation is cooperative; Forge and durable-generation jobs have no cancellation API); explicitly authorize agent dispatch and paid work; retain external-turn keys/turn IDs and Forge request keys/job IDs and poll later; clean up; test activation/auth/rejection/repeat/cleanup/UI; integration-test current Core; match manifest version to tag; publish an accepted tag; and verify install/enable/use/disable/update/uninstall in development.
 
+
+
+## Native agent extensions
+
+Current Core also exposes owner-scoped `agents.owned.list/create/read/update`, canonical `agents.owned.referenceImages` and mod-keyed `forge.references` CRUD; activation-only owner/shared `agents.context.register/registerShared`; and `agents.runs.onCompleted/list/activity`. See the [native capability lesson](advanced/native-agents.md) for exact closed flags, provider records, auth/ownership, advisory catch-up, transport activity semantics, runnable examples and tested limits. Ordinary directories default to panel-visible identities; `agents.list({includeHidden:true})` opts into hidden identities, not private profiles or authority. The standalone Settings selection example demonstrates current UI-host layout metadata and `setEntitySelector`, not a new server capability or permission.

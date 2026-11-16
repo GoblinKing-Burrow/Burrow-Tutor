@@ -18,14 +18,14 @@ do {
 } while (cursor);
 ```
 
-The default page size is 50 and the maximum is 100. Entries contain `id`, `agentId`, `archiveTitle`, `updatedAt`, `archived`, and `archiveId`; reset snapshots also contain `sourceSessionId`. Agent IDs must be registered. Core can read a disabled agent's persisted workspace without starting it when a workspace resolver is available.
+The default page size is 50 and the maximum is 100. Entries contain `id`, `agentId`, `archiveTitle`, `updatedAt`, `archived`, and `archiveId`; reset snapshots also contain `sourceSessionId`. Agent IDs must be registered. Core can resolve a disabled agent without starting it when a workspace resolver is available; conversation records themselves come from Core's PostgreSQL-backed conversation store, not a transcript-file scan.
 
 The first page captures an immutable inventory sorted by conversation identity. Continue with the opaque `nextCursor`; do not inspect or manufacture it. The snapshot is scoped to this host, agent, resolved workspace, and `includeArchived`, expires after five minutes, and is released on the final page or host shutdown. Core retains at most 16 unfinished snapshots per host.
 
 - `mod_conversation_cursor_stale`: expired, completed, cross-scope, legacy, reload-invalidated cursor. Restart at page one.
 - `mod_conversation_snapshot_capacity`: too many unfinished traversals. Finish or abandon existing work and retry later; Core does not evict somebody else's traversal.
 
-A fresh traversal is required to see additions/deletions. The initial active/archive filesystem inventory reads are sequential, not one filesystem transaction.
+A fresh traversal is required to see additions/deletions. The initial active-session and reset-archive store queries are sequential, not one database snapshot transaction. Internal context-only sessions are excluded.
 
 Tutor exposes `GET /advanced/conversations?agentId=hatchet&limit=50&includeArchived=true&cursor=...`. It validates query values, requires trusted operator route access, and forwards the cursor unchanged.
 
@@ -48,11 +48,11 @@ do {
 } while (before);
 ```
 
-Pages are newest-first windows of at most 100 turns **and** 256,000 serialized UTF-8 bytes. Repeat `from` and `to` unchanged on every continuation. Cursors bind agent, session, archive, workspace, filters, and transcript manifest; reset/rotation can invalidate them.
+Pages are newest-first windows of at most 100 turns **and** 256,000 serialized UTF-8 bytes. Repeat `from` and `to` unchanged on every continuation. Signed read cursors bind agent, session, archive, filters and the digest of the current filtered transcript. An appended or changed matching turn can invalidate continuation with `mod_conversation_cursor_stale`; restart and deduplicate rather than treating the cursor as a durable snapshot.
 
 A large turn may arrive as multiple `turn.segment` pieces. Pieces preserve the turn ID and metadata; concatenate `content` in cursor order until `end === total`. `start`, `end`, and `total` count Unicode code points. Verify the supplied SHA-256 `digest` of the normalized full turn if integrity matters. Never render pieces as separate chat turns.
 
-If metadata alone cannot fit, the page reports a gap with reason `turn_metadata_exceeds_envelope`, `historyStatus: 'unavailable'`, and warnings, then advances past it. Follow `nextCursor` to continue older history. Retention, missing retained files, stored truncation, or an unprovable archive chain can also make history unavailable. Treat `historyStatus`, `historyWarnings`, and `gaps` as data; never label surviving turns “complete” merely because the request succeeded.
+If metadata alone cannot fit, the page reports a gap with reason `turn_metadata_exceeds_envelope`, `historyStatus: 'unavailable'`, and warnings, then advances past it. Follow `nextCursor` to continue older history. A source record without a valid turn ID or timestamp becomes an `invalid_source_turn` gap with its record index and invalid fields. Stored truncation is reported through `stored_turn_content_truncated`. A missing session/archive fails as not found, rather than becoming an empty complete history. Treat `historyStatus`, `historyWarnings`, and `gaps` as data; never label surviving turns “complete” merely because the request succeeded.
 
 Tutor's `POST /advanced/conversations/read` forwards the read fields but currently does not forward an HTTP abort signal to Core. For cancellable background/tool code, call the capability directly as above. Aborting rejects promptly with `mod_capability_cancelled`; synchronous reader work can only stop cooperatively, and late results are ignored.
 
@@ -65,3 +65,4 @@ Core scopes filesystem access, but your route still owns product authorization. 
 ## Verify
 
 `test/advanced-capabilities.test.mjs` covers validated list/read forwarding. `npm run test:core` invokes current Core's real inventory and conversation pager through Tutor's forked host using controlled conversation records. Snapshot expiry/capacity, archive/reset reads, segmentation, gaps, cancellation, and recovery remain focused gaps; see [coverage](coverage.md).
+

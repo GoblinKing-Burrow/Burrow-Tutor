@@ -95,3 +95,7 @@ On 26 October 2026, a delta review checked Tutor `e9805f5a50a49b831dc29a757ae511
 ## 1 November full documentation reconciliation
 
 All Beginner and Advanced guides were statically compared with Tutor `5933593abf7b496a70c702e751f8c87ccb19889f`, current Core contracts and implementation, and checked-in test declarations. Current Core supports external-turn attachments and additional scheduler job kinds that this deliberately narrower lab does not expose. Generic model generation does not expose the independent chat thinking-mode control. No application tests or live providers were run; historical pass receipts remain historical.
+
+## 15 November 2026 full documentation reconciliation
+
+All 20 site lessons were statically reconciled with Tutor `e6b21379682d9c3942fa2f978391665bddca07c9`, Core `29ca7b6cec378700503a587703adc1d82e9d6f6d` and UI `171b19da7ce074fbcb19fa1ed20dfd58e9133cb5`. Corrections distinguish PostgreSQL conversation reads and digest-bound continuation from legacy filesystem descriptions; document durable generation and Forge input/output bounds and scheduler byte-limited projections; and distinguish Archive `update` support from the legacy remount path used by Tutor. The installed example and its narrower adapters remain unchanged. Tutor still has no existing skill package to reconcile. This was static source/test-definition inspection and documentation/reference checking only, not an application test, browser acceptance, provider call or skill-script execution. Earlier execution receipts remain historical.

@@ -50,3 +50,5 @@ Tutor intentionally describes those names only to prevent accidental misuse. Con
 
 The coverage matrix names the expected runnable advanced paths so documentation, implementation, and tests can move together. A future release may package these lessons in a repository `SKILL.md` for agent-guided authoring. Do not create or depend on that file yet; it is not part of today's mod contract.
 
+
+- [Native identities, per-turn/shared context, portraits, completion/activity and Settings selection](native-agents.md) — standalone no-inference lab with focused current-Core integration.

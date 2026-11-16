@@ -45,3 +45,20 @@ test('standalone declarative Settings example uses Core-rendered fields and scop
   assert.equal(calls.length, 1);
   await assert.rejects(handleSettingsAction('other', {}), /unknown_settings_action/);
 });
+
+test('imperative Settings layout/selection publishes host shape and clears on unmount', async () => {
+  const { settingsSections, mountSettings } = await import('../ui/entity-settings.example.js');
+  assert.equal(settingsSections[0].layout, 'form-wide');
+  const previous = globalThis.document;
+  globalThis.document = { createElement: () => ({ textContent: '' }) };
+  try {
+    let selector; let rendered; let cleared = false;
+    const cleanup = mountSettings({ agents: [{ id: 'a', name: 'A', enabled: true }, { id: 'b', name: 'B', enabled: true }, { id: 'off', name: 'Off', enabled: false }],
+      primary: { replaceChildren: node => { rendered = node.textContent; }, clear: () => { cleared = true; } },
+      setEntitySelector: value => { selector = value; } });
+    assert.deepEqual(selector.items, [{ id: 'a', label: 'A' }, { id: 'b', label: 'B' }]);
+    selector.onSelect('b'); assert.match(rendered, /b$/); assert.equal(selector.selectedId, 'b');
+    selector.onSelect('off'); assert.equal(selector.selectedId, 'b');
+    cleanup(); assert.equal(selector, null); assert.equal(cleared, true);
+  } finally { globalThis.document = previous; }
+});
