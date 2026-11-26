@@ -159,7 +159,7 @@ test('packaged advanced examples invoke current Core capability RPC and preserve
   const invoke = (routeId, { body = null, query = {}, params = {} } = {}) => host.invoke(routeId, { auth, body, query, params, headers: {} });
 
   const identity = await invoke('route-1');
-  assert.deepEqual(identity.body, { ok: true, modId: ownerModId, operator: { id: 'goblin-king', name: 'Goblin King' }, timezone: 'America/Chicago', agents: [{ id: 'hatchet', name: 'Hatchet', enabled: true }, { id: 'sleeping', name: 'Sleeping', enabled: false }] });
+  assert.deepEqual(identity.body, { ok: true, modId: ownerModId, operator: { id: 'goblin-king', name: 'Goblin King' }, timezone: 'America/Chicago', agents: [{ id: 'hatchet', name: 'Hatchet', enabled: true, identity: { type: 'agent', ownerModId: null } }, { id: 'sleeping', name: 'Sleeping', enabled: false, identity: { type: 'agent', ownerModId: null } }] });
   assert.doesNotMatch(JSON.stringify(identity), /private-avatar|private-profile|never-exposed/);
 
   const inventory = await invoke('route-2', { query: { agentId: 'hatchet', limit: '10', includeArchived: 'true' } });
